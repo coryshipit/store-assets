@@ -1,39 +1,40 @@
-# Store Assets Starter Kit
+# Store Assets
 
-这是可以直接下载并复制到应用项目中的 Store Assets 工作包。
+This directory is the **copyable working package** of Store Assets.
 
-当前工作包面向 Microsoft Store。复制后，建议将本目录重命名为应用项目中的：
+Store Assets is a Git-native, agent-readable workflow for preparing app store submissions. It organizes store copy, screenshots, release notes, submission records, and release-readiness state inside the repository, then hands off to the store's official CLI, API, or CI tooling for the actual submission.
 
-```text
-store-assets/
-```
+It is **not** a store backend replacement, SaaS, GUI, ASO platform, or auto-upload service. It standardizes preparation, not upload.
 
-## 给 Agent 的使用方式
-
-开始任何任务前，Agent 应先阅读本文件和同目录的 `AGENTS.md`，然后检查应用项目中的产品事实、版本信息和现有 Store Assets 文件。
-
-常见任务包括：
-
-- 初始化缺失的 Store Assets 目录
-- 准备新的 `release-prep/<submission-id>/`
-- 校验发布物料
-- 记录 submission 状态
-- 在确认已经 published 后更新 `current/`
-
-Agent 不得凭空创建产品能力或未经验证的商店声明，也不得在准备新 submission 时直接修改 `current/`。
-
-## 目录结构
+## What is inside
 
 ```text
 store-assets/
-├── README.md
-├── AGENTS.md
-└── microsoft-store/
-    ├── current/
-    ├── release-prep/
-    ├── submissions/
-    └── templates/
+├── README.md                     # this file — static package overview
+├── store-assets-workflow.md      # process spec — how the workflow runs
+├── templates/
+│   └── store-rulebook.md.template # rule source; generates <product name>-store-assets.md
+├── microsoft-store/
+│   ├── current/                  # live, published assets (per locale)
+│   ├── release-prep/             # draft assets (per locale)
+│   ├── submissions/              # one record file per submission
+│   └── templates/                # record template sources (reserved)
+├── apple-app-store/              # reserved skeleton (future adapter)
+└── google-play/                  # reserved skeleton (future adapter)
 ```
 
-这是用户项目中的工作目录，不要把本仓库根目录的开发任务、Roadmap 或 reference 文件复制进来。
+## How to use it
 
+1. Copy this package into your application project as `store-assets/`.
+2. Read `store-assets-workflow.md` — it is the process spec: lifecycle, status machine, steps, and the variable interface.
+3. Ask an agent to initialize the store assets, or follow `store-assets-workflow.md` yourself.
+4. Prepare drafts in `microsoft-store/release-prep/<locale>/`; record each submission in `microsoft-store/submissions/`.
+5. Only promote to `microsoft-store/current/<locale>/` after the store has published the submission.
+
+## How rules are created
+
+Process lives in `store-assets-workflow.md`. Per-project rules (structure, naming, file contents, validation) live in the rulebook, which is generated once per project from `templates/store-rulebook.md.template`. The rulebook filename follows `<product name>-store-assets.md`; see the workflow for the exact naming.
+
+## Notes
+
+This `README.md` is a static guide — it describes the package itself, not any specific project. It contains no project-specific values and is not generated from a template.

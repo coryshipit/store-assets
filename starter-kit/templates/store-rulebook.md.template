@@ -1,0 +1,234 @@
+---
+template_version: 1.0.0
+---
+
+# {{PRODUCT_NAME}} Store Assets — Rules
+
+This document defines the required structure, naming rules, and content rules for the store assets of {{PRODUCT_NAME}} in this repository.
+
+It is generated from `templates/store-rulebook.md.template` with the project and submission variables resolved. The process for preparing and promoting submissions lives in `store-assets-workflow.md`; this document defines what the files must look like.
+
+## 1. Placeholder policy
+
+This document is generated with the **project variables** resolved (product name, store, locale, current version).
+
+Per-submission values (`{{LOCALE}}`, `{{SUBMISSION_ID}}`, `{{APPLICATION_VERSION}}`, `{{PUBLICATION_DATE}}`, `{{STATUS}}`) have no value until a submission begins. In examples and file skeletons below, they appear as **literal `{{...}}` placeholders on purpose** — they are examples of what a file looks like, not values to resolve. Do not treat them as unresolved errors.
+
+## 2. Project facts
+
+- Product name: {{PRODUCT_NAME}}
+- Store platform: {{STORE_PLATFORM}} ({{STORE_DISPLAY_NAME}})
+- Default locale: {{DEFAULT_LOCALE}}
+- Current application version: {{CURRENT_APP_VERSION}}
+
+## 3. Standard structure
+
+```text
+store-assets/
+├── store-assets-workflow.md      # process spec
+├── README.md                     # static package overview
+├── {{RULEBOOK_FILE}}             # this document
+├── templates/                    # package-level template sources
+│   └── store-rulebook.md.template
+├── {{STORE_PLATFORM}}/
+│   ├── current/                  # live published assets, per locale
+│   ├── release-prep/             # draft assets, per locale
+│   ├── submissions/              # one record file per submission
+│   └── templates/                # store-specific record template sources
+├── apple-app-store/              # reserved skeleton, future Adapter
+│   ├── current/
+│   ├── release-prep/
+│   ├── submissions/
+│   └── templates/
+└── google-play/                  # reserved skeleton, future Adapter
+    ├── current/
+    ├── release-prep/
+    ├── submissions/
+    └── templates/
+```
+
+The layout is identical across store adapters by design; the lifecycle is shared, but each adapter keeps its own fields, templates, and validation rules. `apple-app-store/` and `google-play/` exist as **empty reserved skeletons** only — no rules for them are assumed until researched and verified.
+
+`current/`, `release-prep/`, and `submissions/` are created by first initialization; locale subfolders are created when a locale is actually used.
+
+## 4. Directory responsibilities
+
+### `current/`
+
+Represents the live store state, organized per locale:
+
+```text
+current/<locale>/
+├── listing.md
+├── release-notes.md
+└── screenshots/
+    ├── source/
+    └── export/
+```
+
+- Must not be edited while preparing an update.
+- Must not be replaced until the user confirms the new submission is live.
+- Older published versions are preserved through Git history.
+
+### `release-prep/`
+
+Contains draft assets for an upcoming submission, per locale, mirroring `current/<locale>/` so publish is a tree-level move.
+
+```text
+release-prep/<locale>/
+├── listing.md
+├── release-notes.md
+└── screenshots/
+    ├── source/
+    └── export/
+```
+
+- Prepare updates only here, never in `current/`.
+- The submission variables live in the submission record (in `submissions/`).
+- The status field tracks the whole flow; no per-folder naming needed.
+- Use the same tree whether the update is a new build or only listing metadata and screenshots.
+
+### `submissions/`
+
+One record file per submission:
+
+```text
+submissions/<submission-id>.md
+```
+
+Records submission ID, date, application version, update type, locales, status, publication date, changes, submitted files, and review notes. Git history preserves exact versions, so records do not duplicate all assets.
+
+### `templates/`
+
+Two template locations, kept apart on purpose:
+
+- `templates/` (package level) — the template source that generates this rulebook. The package `README.md` is static, not generated.
+- `<STORE_PLATFORM>/templates/` — store-specific record templates (listing, release notes, submission records), reserved for a later phase.
+
+Use an existing template instead of inventing a new structure.
+
+## 5. Naming rules
+
+- Directories: lowercase `kebab-case` (`store-assets`, `microsoft-store`, `release-prep`); locales use official codes (`en-US`, `zh-CN`).
+- Markdown files: short lowercase `kebab-case` names (`listing.md`, `release-notes.md`, `2026-08-04-listing-refresh.md`).
+- Every level-1 heading includes the product name:
+  - `# {{PRODUCT_NAME}} Microsoft Store Listing — {{LOCALE}}`
+  - `# {{PRODUCT_NAME}} Microsoft Store Release Notes — {{LOCALE}}`
+  - `# {{PRODUCT_NAME}} Microsoft Store Submission — {{SUBMISSION_ID}}`
+- Screenshots: two-digit order + semantic lowercase `kebab-case`, no spaces, no version words (`final`, `new`, `latest`):
+
+  ```text
+  01-primary-value.png
+  02-core-workflow.png
+  ```
+
+  Editable files go in `screenshots/<locale>/source/`; upload-ready files in `screenshots/<locale>/export/`.
+
+## 6. Required file contents
+
+### `current/<locale>/listing.md` and `release-prep/<locale>/listing.md`
+
+```markdown
+# {{PRODUCT_NAME}} Microsoft Store Listing — {{LOCALE}}
+
+Last reviewed:
+Application version:
+Listing status:
+
+## Short description
+
+## Product description
+
+## Product features
+
+1.
+
+## Keywords
+
+-
+
+## Screenshot titles
+
+1.
+2.
+3.
+4.
+
+## Review notes
+```
+
+### `current/<locale>/release-notes.md` and `release-prep/<locale>/release-notes.md`
+
+```markdown
+# {{PRODUCT_NAME}} Microsoft Store Release Notes — {{LOCALE}}
+
+## {{APPLICATION_VERSION}}
+
+-
+```
+
+### `submissions/<submission-id>.md` ({{STORE_PLATFORM}})
+
+```markdown
+# {{PRODUCT_NAME}} Microsoft Store Submission — {{SUBMISSION_ID}}
+
+Submission ID:
+Submission date:
+Application version:
+Update type:
+Locales:
+Status:
+Publication date:
+
+## Changes
+
+## Submitted files
+
+## Certification result
+
+## Review notes
+```
+
+## 7. Content accuracy rules
+
+Write and update claims only against verifiable sources: PRD, released application behavior, release notes, QA, approved screenshots, and confirmed user decisions. Never advertise:
+
+- unreleased features
+- unsupported formats or platforms
+- unimplemented AI or agent integrations
+- privacy guarantees outside the application's control
+- performance claims without evidence
+
+Unverifiable claims are flagged for review, not silently kept. No invented marketing copy, legal claims, prices, release dates, or capabilities.
+
+## 8. Security rules
+
+Never store in the repository:
+
+- store account passwords, API keys, or recovery codes
+- signing certificates or payment information
+- secret environment variables
+- private documents or personal identification
+- unredacted account screenshots or private user data
+
+Screenshots containing personal names, account information, private paths, or confidential documents must be redacted before commit.
+
+## 9. Ready-for-submission checklist
+
+A release preparation is ready only when:
+
+- [ ] Required listing fields are complete.
+- [ ] Copy matches the released product.
+- [ ] Keywords are relevant, not over-repeated.
+- [ ] Release notes present when required.
+- [ ] Screenshots are final and upload-ready.
+- [ ] Screenshot order is confirmed.
+- [ ] Filenames follow the naming rules in §5.
+- [ ] No unsupported feature is advertised.
+- [ ] No sensitive information included.
+- [ ] Store-specific requirements checked.
+- [ ] User has reviewed the final package.
+
+---
+
+Generated by Store Assets from `templates/store-rulebook.md.template` (version {{TEMPLATE_VERSION}}). When these rules change, this file is regenerated and the template version is bumped.

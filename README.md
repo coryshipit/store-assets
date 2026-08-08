@@ -11,8 +11,8 @@ Store Assets 不是应用商店后台的替代品，也不是 SaaS、GUI、ASO �
 如果要在自己的应用项目中使用 Store Assets：
 
 1. 下载或复制 [`starter-kit/`](starter-kit/)
-2. 将它放入应用仓库，并按 `starter-kit/README.md` 的说明使用
-3. 让 Agent 先阅读复制后的 `README.md` 和 `AGENTS.md`
+2. 将它放入应用仓库，并重命名为 `store-assets/`
+3. 让 Agent 先阅读复制后的 `store-assets-workflow.md`
 4. 再执行初始化、准备 submission 或校验任务
 
 `starter-kit/` 是面向用户的可复制工作包；根目录 `AGENTS.md` 只用于开发 Store Assets 本身，不需要复制到用户应用项目中。
@@ -21,8 +21,10 @@ Store Assets 不是应用商店后台的替代品，也不是 SaaS、GUI、ASO �
 
 - [`AGENTS.md`](AGENTS.md)：本仓库开发 Agent 的职责和行为约束
 - [`reference/PROJECT-CONTEXT.zh-CN.md`](reference/PROJECT-CONTEXT.zh-CN.md)：项目背景、架构决策和范围
-- [`docs/MISSION.md`](docs/MISSION.md)：当前任务、目标、优先级和完成状态
-- [`docs/ROADMAP.md`](docs/ROADMAP.md)：项目整体路线图和后续开发方向
+- [`docs/MISSION.md`](docs/MISSION.md)：项目使命陈述
+- [`docs/ROADMAP.md`](docs/ROADMAP.md)：项目整体方向和开发任务进展
+- [`docs/QA.md`](docs/QA.md)：starter-kit 的质量检查清单与干跑验证步骤
+- [`docs/DISTRIBUTION.md`](docs/DISTRIBUTION.md)：starter-kit 的 Release 分发机制设计
 - [`starter-kit/`](starter-kit/)：用户可直接下载和复制的工作包
 
 ## 核心生命周期
