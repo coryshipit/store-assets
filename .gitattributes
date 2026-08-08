@@ -1,0 +1,49 @@
+﻿# Default: normalize detected text files to LF
+* text=auto eol=lf
+
+# Define an explicit binary-file attribute:
+# do not normalize line endings, diff, or attempt text merges
+[attr]binaryfile -text -diff -merge
+
+# Documentation and configuration
+*.md          text eol=lf
+*.txt         text eol=lf
+*.json        text eol=lf
+*.jsonc       text eol=lf
+*.yaml        text eol=lf
+*.yml         text eol=lf
+*.toml        text eol=lf
+*.xml         text eol=lf
+*.csv         text eol=lf
+*.tsv         text eol=lf
+*.svg         text eol=lf
+
+# Images
+*.png         binaryfile
+*.jpg         binaryfile
+*.jpeg        binaryfile
+*.gif         binaryfile
+*.webp        binaryfile
+*.avif        binaryfile
+*.ico         binaryfile
+*.bmp         binaryfile
+*.tif         binaryfile
+*.tiff        binaryfile
+*.psd         binaryfile
+
+# Fonts
+*.woff        binaryfile
+*.woff2       binaryfile
+*.ttf         binaryfile
+*.otf         binaryfile
+*.eot         binaryfile
+
+# Compiled files, archives, installers, and other binary artifacts
+*.pdf         binaryfile
+*.zip         binaryfile
+*.7z          binaryfile
+*.rar         binaryfile
+*.gz          binaryfile
+*.bz2         binaryfile
+*.xz          binaryfile
+*.tar         binaryfile

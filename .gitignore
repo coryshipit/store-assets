@@ -1,0 +1,18 @@
+﻿# Local environment and secrets
+.env
+.env.*
+!.env.example
+!.env.*.example
+
+# Logs and temporary files
+*.log
+*.tmp
+*.swp
+
+# Operating system metadata
+.DS_Store
+Thumbs.db
+Desktop.ini
+
+# Project-specific: reference materials stay local only
+reference/
