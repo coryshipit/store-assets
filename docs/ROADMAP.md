@@ -144,12 +144,34 @@ record the submission in submissions/ (status = Published)
 | ID | Task | Status | Notes |
 | --- | --- | --- | --- |
 | A | Complete Microsoft Store templates and specification | done | workflow (process) + rulebook template + static README implemented in `starter-kit/`; record templates deferred to the variables.yaml version |
-| B | Establish the starter-kit release mechanism | done | packaging contract in `docs/DISTRIBUTION.md` (zip top-level folder `store-assets/`); tag-triggered packaging workflow implemented in `.github/workflows/release.yml` (2026-08-09); first release publishing remains
+| B | Establish the starter-kit release mechanism | done | packaging contract in `docs/DISTRIBUTION.md` (zip top-level folder `store-assets/`); tag-triggered packaging workflow implemented in `.github/workflows/release.yml` (2026-08-09); first release published 2026-08-09 (v0.1.0, see "Release log") |
 | C | Convert documentation to English | done | all docs now English, including the root `README.md` (translated 2026-08-09) |
 | D | Add tool recommendations to the root README | pending | recommend complementary ecosystem tools so users pick what fits their target store |
 | E | Finalize the starter-kit structure under the two mechanisms | done | structure implemented in `starter-kit/` per the "Finalized starter-kit design" section |
 | F | Establish a QA procedure for the starter kit | done | `docs/QA.md` defines conformance + dry-run checks; staged dry-run mode adopted (2026-08-08) after three full-run attempts ended in headless-agent silence — judged by files, not by the agent's final message; dry-run fixture project exists but no full pass recorded yet |
 | G | Research and optimize the testing approach | pending | the staged dry-run is an interim method; the overall testing approach needs further research — dry-run may not be the optimal solution (recorded 2026-08-08) |
+| H | Clarify the unpacked-package user experience | proposed | first-time users may not know which folder to use after unzipping the release; improve the delivery artifact and make usage instructions explicit (2026-08-09) |
+
+### Release log
+
+| Release | Date | Asset | Notes |
+| --- | --- | --- | --- |
+| v0.1.0 | 2026-08-09 | `store-assets-starter-kit-v0.1.0.zip` | First release of the kit. Built by the tag-triggered packaging workflow; zip top-level folder is `store-assets/`. |
+
+### Task H detail
+
+**Why:** v0.1.0 was verified by downloading the release and unzipping it. The zip contains a top-level `store-assets/` folder, which is correct, but first-time users are unsure which folder they should actually use after unzipping, and the packaging instructions do not make this obvious.
+
+**What:** improve the release zip so first-time users are not confused about which folder to use:
+
+- confirm whether the zip should ship a single top-level `store-assets/` folder (current) or a wrapper folder (e.g. `store-assets-v0.1.0/`) with clear placement guidance,
+- make the kit usage instructions explicit about where the archive should be copied after extraction (which folder, what to rename, what to discard),
+- keep the applied-project package (`store-assets/` with the kit inside the app repository) unchanged — this task is about the **delivery artifact**, not the installed structure.
+
+**Acceptance:**
+- [ ] A first-time user knows exactly which folder to copy after unzipping, with no assumptions.
+- [ ] The decision is recorded (this section), and the packaging contract in `docs/DISTRIBUTION.md` stays in sync.
+- [ ] Options explored and a decision recorded.
 
 ### Task D detail
 
@@ -172,17 +194,19 @@ record the submission in submissions/ (status = Published)
 ## Priority
 
 1. Complete the Microsoft Store templates and specification (Task A)
-2. Establish the release mechanism and publish the first artifact (Task B)
+2. Release the first artifact (Task B, released 2026-08-09 — v0.1.0)
 3. Keep lifecycle, naming, and terminology consistent across `README.md`, `starter-kit/`, templates, and examples
 4. Add the tool recommendations section to the root `README.md` (Task D)
+5. Clarify the unpacked-package user experience (Task H) and adjust the delivery artifact accordingly
 
 ## Next steps
 
 - Run the QA procedure from `docs/QA.md` on the current kit in **staged mode** (one phase per fresh session, files-only acceptance) and record the result.
 - Research the testing approach (Task G): decide whether dry-run stays, is replaced, or is supplemented — the current method is not yet considered optimal.
 - Clarify and accept the concrete list for Task D with verifiable sources before writing it into `README.md`.
-- Publish the first release artifact: push tag `v0.1.0`, let `.github/workflows/release.yml` build and attach the zip, then write the release notes (planned 2026-08-09).
+- Publish the first release artifact: push tag `v0.1.0`, let `.github/workflows/release.yml` build and attach the zip, then write the release notes (planned 2026-08-09). ✅ Done — released 2026-08-09 as v0.1.0 (see "Release log").
 - Track new tasks as they are added to this doc (validation script, CLI, multi-store adapters).
+- Resolve Task H (which folder users should use after unzipping the release) and, if needed, adjust the packaging contract and release notes.
 
 ## Future phases (at a glance)
 
