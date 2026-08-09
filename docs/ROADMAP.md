@@ -65,7 +65,7 @@ Consolidated from the discussion above. This is the agreed Phase 1 target for `s
 
 **Refinement (2026-08-09):** the entry points split by phase. Initialization is the first task: the agent reads the workflow and the rulebook template, confirms project variables with the user, and generates the rulebook — no store work happens before it exists. Later tasks read the existing rulebook instead (workflow §1.1 / §1.2).
 
-**Refinement (2026-08-09):** the release package changes shipped name. The zip's top-level folder is `store-assets/` (the repository's `starter-kit/` renamed at package time), so a download needs no renaming step. See `docs/DISTRIBUTION.md`; the packaging mechanism itself is still Task B.
+**Refinement (2026-08-09):** the release package changes shipped name. The zip's top-level folder is `store-assets/` (the repository's `starter-kit/` renamed at package time), so a download needs no renaming step. See `docs/DISTRIBUTION.md`; the mechanism is implemented (Task B, 2026-08-09).
 
 **Refinement (2026-08-09):** the rulebook file name derivation is fixed. `{{RULEBOOK_FILE}}` derives from `{{PRODUCT_NAME}}` by: lowercase; replace separators (space, `_`, `.`, `/`) with `-`; no hyphen inserted at digit or camelCase boundaries; keep existing hyphens; collapse repeated hyphens and trim edges; append `-store-assets.md`. Definition lives in `store-assets-workflow.md` §2.
 
@@ -144,7 +144,7 @@ record the submission in submissions/ (status = Published)
 | ID | Task | Status | Notes |
 | --- | --- | --- | --- |
 | A | Complete Microsoft Store templates and specification | done | workflow (process) + rulebook template + static README implemented in `starter-kit/`; record templates deferred to the variables.yaml version |
-| B | Establish the starter-kit release mechanism | pending | packaging contract finalized in `docs/DISTRIBUTION.md` (zip top-level folder `store-assets/`); mechanism itself (packaging + tag-triggered GitHub Actions) not implemented yet |
+| B | Establish the starter-kit release mechanism | done | packaging contract in `docs/DISTRIBUTION.md` (zip top-level folder `store-assets/`); tag-triggered packaging workflow implemented in `.github/workflows/release.yml` (2026-08-09); first release publishing remains
 | C | Convert documentation to English | done | all docs now English, including the root `README.md` (translated 2026-08-09) |
 | D | Add tool recommendations to the root README | pending | recommend complementary ecosystem tools so users pick what fits their target store |
 | E | Finalize the starter-kit structure under the two mechanisms | done | structure implemented in `starter-kit/` per the "Finalized starter-kit design" section |
@@ -181,7 +181,7 @@ record the submission in submissions/ (status = Published)
 - Run the QA procedure from `docs/QA.md` on the current kit in **staged mode** (one phase per fresh session, files-only acceptance) and record the result.
 - Research the testing approach (Task G): decide whether dry-run stays, is replaced, or is supplemented — the current method is not yet considered optimal.
 - Clarify and accept the concrete list for Task D with verifiable sources before writing it into `README.md`.
-- Reopen Task B with a packaging upload workflow (tag-triggered GitHub Actions that produces the plain zip; top-level folder `store-assets/` per `docs/DISTRIBUTION.md`).
+- Publish the first release artifact: push tag `v0.1.0`, let `.github/workflows/release.yml` build and attach the zip, then write the release notes (planned 2026-08-09).
 - Track new tasks as they are added to this doc (validation script, CLI, multi-store adapters).
 
 ## Future phases (at a glance)

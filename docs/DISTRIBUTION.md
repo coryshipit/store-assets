@@ -60,9 +60,9 @@ Rules for what is included and what is not:
 
 - Existing releases are not mutated once published. A new version of the kit is a new release.
 
-## Required workflow behavior (todo: implement in Task B)
+## Required workflow behavior
 
-Current status: not yet implemented (blocked until the distribution mechanism task is opened; see [`ROADMAP.md`](ROADMAP.md)).
+Current status: implemented (2026-08-09) via `.github/workflows/release.yml` — a tag-triggered (`v*`) GitHub Actions workflow.
 
 For each release tag, the mechanism should:
 
@@ -72,7 +72,7 @@ For each release tag, the mechanism should:
 4. Attach the zip to the release as an asset.
 5. Be repeatable: the same tag always produces the same artifact.
 
-Recommended implementation: a tag-triggered GitHub Actions workflow.
+The workflow packages `starter-kit/` as `store-assets/` in a zip named `store-assets-starter-kit-<tag>.zip`, verifies the layout (workflow present, no dev files), and attaches it to the release (creating a draft release first if none exists, so release notes can be written before publishing).
 
 ## Acceptance criteria
 

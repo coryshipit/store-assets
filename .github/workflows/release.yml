@@ -1,0 +1,45 @@
+name: Build Release Package
+
+on:
+  push:
+    tags:
+      - 'v*'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  package:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Build zip
+        run: |
+          mkdir -p dist
+          cp -r starter-kit dist/store-assets
+          (cd dist && zip -r "../store-assets-starter-kit-${GITHUB_REF_NAME}.zip" store-assets)
+
+      - name: Verify zip layout
+        run: |
+          unzip -l store-assets-starter-kit-${GITHUB_REF_NAME}.zip | head -20
+          unzip -l store-assets-starter-kit-${GITHUB_REF_NAME}.zip | grep -q "store-assets/store-assets-workflow.md" || { echo "ERROR: workflow missing"; exit 1; }
+          unzip -l store-assets-starter-kit-${GITHUB_REF_NAME}.zip | grep -q "store-assets/AGENTS.md" && { echo "ERROR: dev file packaged"; exit 1; }
+
+      - name: Get or create release
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          if gh release view "${{ github.ref_name }}" >/dev/null 2>&1; then
+            echo "release exists"
+          else
+            gh release create "${{ github.ref_name }}" --draft --title "Store Assets Starter Kit ${{ github.ref_name }}" --notes "Release description to be filled in."
+          fi
+
+      - name: Upload asset
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          gh release upload "${{ github.ref_name }}" store-assets-starter-kit-${{ github.ref_name }}.zip --clobber
