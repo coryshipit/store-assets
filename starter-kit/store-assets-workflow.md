@@ -8,6 +8,26 @@ For package context (what this is, how to start) see the static `README.md`. For
 
 ## 1. Before starting, the agent reads
 
+There are two entry points, and they read different files: **first setup (initialization)** has no rulebook yet; **later tasks** do.
+
+### 1.1 Initialization — the first entry (no rulebook exists yet)
+
+1. This document (process).
+2. `templates/store-rulebook.md.template` — the source of structure and rules until the rulebook exists.
+3. Verifiable facts in the application project: PRD, release notes, QA results, and approved screenshots.
+
+Then identifies:
+
+- product name
+- target store
+- default locale
+- current application version
+- task: initialize
+
+Then generates the rulebook (§3). No other store work happens before the rulebook exists.
+
+### 1.2 Later tasks — rulebook already exists
+
 1. This document (process).
 2. The project rulebook (`<PRODUCT_NAME>-store-assets.md`) — structure and rules.
 3. The relevant template under `templates/`.
@@ -16,11 +36,7 @@ For package context (what this is, how to start) see the static `README.md`. For
 
 Then identifies:
 
-- product name
-- target store
-- default locale
-- current application version
-- task type: initialize, prepare update, validate, record status, or promote published assets
+- task type: prepare update, validate, record status, or promote published assets
 
 Anything that cannot be determined safely is marked as pending confirmation, not filled in.
 
@@ -42,7 +58,18 @@ Derived value:
 
 | Placeholder | Meaning |
 |---|---|
-| `{{RULEBOOK_FILE}}` | file name of the generated rulebook: `<PRODUCT_NAME>` lowercased to kebab-case plus `-store-assets.md`, e.g. `my-app-store-assets.md` |
+| `{{RULEBOOK_FILE}}` | file name of the generated rulebook: `<PRODUCT_NAME>` lowercased and normalized to file-safe kebab-case plus `-store-assets.md`, e.g. `my-app-store-assets.md` |
+
+Derivation of `{{RULEBOOK_FILE}}` from `{{PRODUCT_NAME}}`:
+
+1. Convert to all lowercase (`My App` → `my app`, `App2Go` → `app2go`).
+2. Replace separators (space, `_`, `.`, `/`) with `-` (`my_app` → `my-app`).
+3. Never insert `-` between letters and digits, and never insert `-` at camel-case boundaries (`MyApp` stays `myapp`, `App2Go` stays `app2go`).
+4. Keep existing hyphens as-is (`X-Wing` → `x-wing`).
+5. Collapse repeated `-` into one, and trim leading/trailing `-`.
+6. Append `-store-assets.md`.
+
+Examples: `My App` → `my-app-store-assets.md`; `MyApp` → `myapp-store-assets.md`; `App2Go` → `app2go-store-assets.md`; `X-Wing` → `x-wing-store-assets.md`.
 
 ### Submission variables (resolved once per release preparation)
 
@@ -67,7 +94,7 @@ Templates carry a `template_version` marker. When a template changes, its versio
 
 ## 3. Generate the project documents
 
-One generated document is produced at initialization:
+On initialization (§1.1), the agent generates exactly one project document — the rulebook — and this generation **is** the first store work. Later tasks read the existing rulebook instead (§1.2). The generated document:
 
 | Template | Generated file |
 |---|---|
@@ -154,9 +181,10 @@ current → release-prep → submission → published → current
 
 When asked to initialize or perform store work, the agent:
 
-1. Reads this document, the rulebook, and any applicable template.
+1. Reads this document, then either the rulebook (§1.2) or, on first setup, the rule template (§1.1).
 2. Inspects the application project.
 3. Determines the required variables, asking for anything that cannot be inferred.
-4. Creates the standard structure or updates the correct directories.
-5. Generates files from templates.
-6. Reports: created/modified/unmodified paths, gaps, unresolved placeholders, and claims needing review.
+4. If initializing, generates the rulebook from `templates/store-rulebook.md.template` (§3).
+5. Creates the standard structure or updates the correct directories.
+6. Generates or updates the relevant files (from templates where applicable).
+7. Reports: created/modified/unmodified paths, gaps, unresolved placeholders, and claims needing review.

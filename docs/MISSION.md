@@ -10,7 +10,7 @@ Store Assets is not a store backend replacement, not a SaaS, GUI, ASO platform, 
 
 ## Where the rules live
 
-The user-facing package plays the role that the reference project layout drafts played. Within a copied `starter-kit/` (renamed `store-assets/`), process and rules are split between the workflow and the generated rulebook:
+The user-facing package plays the role that the reference project layout drafts played. Within a copied `starter-kit/` (shipped and installed as `store-assets/`), process and rules are split between the workflow and the generated rulebook:
 
 | Reference rule (project description) | Home in the starter kit |
 |---|---|

@@ -6,15 +6,15 @@ It is not a product description for end users, and it is not the manual users fo
 
 ## 1. Scope of work
 
-The repository currently maintains, for Microsoft Store:
+The repository currently maintains:
 
-- a publishing workflow specification
+- a publishing workflow specification (store-agnostic core with per-store rules and adapters)
 - a repository convention
 - reusable templates
 - agent instructions
 - a QA dry-run procedure for the starter kit
 
-The current phase focuses on documentation, templates, and examples. Do not expand into GUI, SaaS, automated publishing, complex CLI, CI services, or Apple / Google rules without an explicit task and a stable specification.
+The workflow itself is not limited to one store — Microsoft Store is simply the first store for which rules are fully researched and implemented. Do not expand into GUI, SaaS, automated publishing, complex CLI, CI services, or Apple / Google rules without an explicit task and a stable specification.
 
 ## 2. Required reading
 
@@ -22,18 +22,18 @@ Before starting work, read as needed:
 
 1. This file
 2. `README.md`
-3. `reference/PROJECT-CONTEXT.zh-CN.md`
-4. `docs/MISSION.md` for the project's mission, and `docs/ROADMAP.md` for task progress
-5. `docs/DISTRIBUTION.md` when working on the release artifact, and `docs/QA.md` when verifying the starter kit
-6. `starter-kit/` files that users will actually copy and use
+3. `docs/MISSION.md` for the project's mission, and `docs/ROADMAP.md` for task progress
+4. `docs/DISTRIBUTION.md` when working on the release artifact, and `docs/QA.md` when verifying the starter kit
+5. `starter-kit/` files that users will actually copy and use
+
+Do not read `reference/` as part of required reading. It holds development-time background material only; read it on demand when the user points you to it.
 
 Priority order:
 
 - The user's explicit instruction comes first
 - This file constrains how the agent develops this repository
-- Product decisions follow `reference/PROJECT-CONTEXT.zh-CN.md` as background
 - User-facing usage follows `README.md` and `starter-kit/store-assets-workflow.md`
-- Specific Microsoft Store rules must come from a recorded specification or verifiable sources
+- Specific store rules must come from a recorded specification or verifiable sources
 
 Do not treat historical conversation or hidden context as project facts. Important decisions must land in repository files.
 
@@ -88,7 +88,7 @@ repository convention
 store-specific rules and adapters
 ```
 
-Do not compress different stores into one universal metadata schema. Only Microsoft Store is researched and implemented today; future stores must keep their own schema, required fields, asset requirements, validation rules, and adapters.
+Do not compress different stores into one universal metadata schema. The workflow's common lifecycle applies across stores; each store keeps its own schema, required fields, asset requirements, validation rules, and adapters. Microsoft Store is currently the only store with fully researched and implemented rules; Apple App Store and Google Play remain reserved skeletons until real research and a stable specification exist.
 
 The recommended automation evolution order is:
 
