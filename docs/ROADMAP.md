@@ -8,9 +8,9 @@ It answers "where is this project going, and what is done so far." Task-level ac
 
 ## Current phase
 
-Phase 1 — Specification: finalize the starter-kit design, implement the Microsoft Store workflow, and ship a copyable starter kit.
+Phase 1 — Specification: finalize the starter-kit design, implement the existing-listing Microsoft Store update workflow, and ship a copyable starter kit.
 
-The target shape: a user copies `starter-kit/` into an application project as `store-assets/`, the agent starts the workflow by reading `store-assets-workflow.md`, and the workflow generates the per-product rules document from the template. The package README is a static overview and is not generated.
+The target shape: each application project has one `store-assets/` work package copied from `starter-kit/`. For an existing Microsoft Store listing, the agent starts the workflow by reading `store-assets-workflow.md` and generates the per-product rules document from the template. The package README is a static overview and is not generated. An application's first store submission remains outside the Phase 1 workflow.
 
 ## Product principles
 
@@ -69,6 +69,8 @@ Consolidated from the discussion above. This is the agreed Phase 1 target for `s
 
 **Refinement (2026-08-09):** the rulebook file name derivation is fixed. `{{RULEBOOK_FILE}}` derives from `{{PRODUCT_NAME}}` by: lowercase; replace separators (space, `_`, `.`, `/`) with `-`; no hyphen inserted at digit or camelCase boundaries; keep existing hyphens; collapse repeated hyphens and trim edges; append `-store-assets.md`. Definition lives in `store-assets-workflow.md` §2.
 
+**Refinement (2026-08-10):** each application project uses one independent `store-assets/` work package. The Phase 1 Microsoft Store adapter manages updates to existing published listings only; an application's first store submission remains outside this workflow. Store selection is task-level adapter selection rather than a project variable. Only `microsoft-store` is executable now; Apple and Google skeletons remain reserved. Each store adapter allows one active submission at a time. A release preparation is a complete candidate snapshot and replaces the corresponding `current/<locale>/` tree after explicit go-live confirmation.
+
 ### 1. Starter-kit directory (after copying into the user project as `store-assets/`)
 
 ```text
@@ -89,7 +91,7 @@ store-assets/
     │           ├── source/
     │           └── export/
     ├── release-prep/                 # Draft area, organized per locale (no submission-ID subdirs)
-    │   └── <locale>/                 #   mirrors current/<locale>/ so publish is a whole-tree move
+    │   └── <locale>/                 #   mirrors current/<locale>/ so publish is a whole-tree replacement
     │       ├── listing.md
     │       ├── release-notes.md
     │       └── screenshots/
@@ -105,7 +107,7 @@ store-assets/
 - **`store-assets-workflow.md` (process spec)**: a pure workflow document — lifecycle, status machine, submission steps, and the variable interface. It carries **no product values and no placeholder-bearing rules**; it is deliberately not named `AGENTS.md` (avoids colliding with project-root `AGENTS.md`) and not named `README`.
 - **`README.md` (static package overview)**: describes what the package is and how to start. It ships as-is, contains **no placeholders**, and is **not** generated from a template.
 - **`templates/store-rulebook.md.template`**: the placeholder-bearing rules source (`{{...}}` + `template_version`), resolved per product into `<PRODUCT_NAME>-store-assets.md` (e.g. `my-app-store-assets.md`). It holds structure, directory responsibilities, naming, file contents, accuracy/security rules, and the ready checklist.
-- **Store-specific record templates** (listing, release notes, submission records): live under `microsoft-store/templates/`, deferred to a later phase alongside `variables.yaml`.
+- **Store-specific record templates** (listing, release notes, submission records): will live under `microsoft-store/templates/`, deferred to a later phase alongside `variables.yaml`. Until then, the rulebook's file skeletons are the required format source.
 - Generated output follows the **`.template.md` → `.md`** convention: the placeholder source is the template; the readable document never ships with unresolved placeholders.
 - Generated output follows the **`.template.md` → `.md`** convention: the placeholder source is the template; the readable document never ships with unresolved placeholders.
 
@@ -120,20 +122,20 @@ store-assets/
 
 - The submission record lives at **`submissions/<submission-id>.md`**, named after the submission ID (`YYYY-MM-DD-task-name`).
 - A `status` field tracks the whole release flow across every stage (enum is illustrative, not exhaustive):
-  `Draft → Ready for submission → Submitted → In certification → [Action required] → Published`
+  `Draft → Submitted → In certification → Published`
   With branches: `Withdrawn` (withdraw at any point), `Rejected` (returned for fixes).
-- Status transitions must still be written back to the bootstrap/spec docs; `current/` must not be updated until the user confirms the app went live.
+- Status transitions must be recorded in the submission record; `current/` must not be updated until the user confirms the app went live.
 
 ### 5. Release flow
 
 ```text
-finish copy + screenshots in release-prep/<locale>/
+finish complete candidate copy + screenshots in release-prep/<locale>/
         ↓ release preparation
 submit a submission to the store
         ↓ user confirms it is live
-move materials to current/<locale>/
+replace current/<locale>/ with the candidate tree
         ↓
-record the submission in submissions/ (status = Published)
+update the submission record (status = Published)
 ```
 
 - `release-prep/` holds only per-locale drafts, no submission records.
@@ -144,12 +146,12 @@ record the submission in submissions/ (status = Published)
 | ID | Task | Status | Notes |
 | --- | --- | --- | --- |
 | A | Complete Microsoft Store templates and specification | done | workflow (process) + rulebook template + static README implemented in `starter-kit/`; record templates deferred to the variables.yaml version |
-| B | Establish the starter-kit release mechanism | done | packaging contract in `docs/DISTRIBUTION.md` (zip top-level folder `store-assets/`); tag-triggered packaging workflow implemented in `.github/workflows/release.yml` (2026-08-09); first release published 2026-08-09 (v0.1.0, see "Release log") |
+| B | Establish the starter-kit release mechanism | done | packaging contract in `docs/DISTRIBUTION.md` (zip top-level folder `store-assets/`); tag-triggered packaging workflow implemented in `.github/workflows/release.yml` (2026-08-09), hardened on 2026-08-10 to accept only `vX.Y.Z` tags, validate package contents, and prohibit mutation of published releases; first release published 2026-08-09 (v0.1.0, see "Release log") |
 | C | Convert documentation to English | done | all docs now English, including the root `README.md` (translated 2026-08-09) |
 | D | Add tool recommendations to the root README | pending | recommend complementary ecosystem tools so users pick what fits their target store |
 | E | Finalize the starter-kit structure under the two mechanisms | done | structure implemented in `starter-kit/` per the "Finalized starter-kit design" section |
-| F | Establish a QA procedure for the starter kit | done | `docs/QA.md` defines conformance + dry-run checks; staged dry-run mode adopted (2026-08-08) after three full-run attempts ended in headless-agent silence — judged by files, not by the agent's final message; dry-run fixture project exists but no full pass recorded yet |
-| G | Research and optimize the testing approach | pending | the staged dry-run is an interim method; the overall testing approach needs further research — dry-run may not be the optimal solution (recorded 2026-08-08) |
+| F | Establish a QA procedure for the starter kit | done | `docs/QA.md` defines conformance + dry-run checks; staged dry-run mode adopted (2026-08-08) after three full-run attempts ended in headless-agent silence — judged by files, not by the agent's final message; dry-run fixture project exists but no full pass recorded yet. The v0.1.1 release exception is recorded below. |
+| G | Research and optimize the testing approach | pending | the staged dry-run is an interim method; the overall testing approach needs further research — dry-run may not be the optimal solution (recorded 2026-08-08). This research is required before treating a future dry-run result as a release gate. |
 | H | Clarify the unpacked-package user experience | proposed | first-time users may not know which folder to use after unzipping the release; improve the delivery artifact and make usage instructions explicit (2026-08-09) |
 
 ### Release log
@@ -157,6 +159,12 @@ record the submission in submissions/ (status = Published)
 | Release | Date | Asset | Notes |
 | --- | --- | --- | --- |
 | v0.1.0 | 2026-08-09 | `store-assets-starter-kit-v0.1.0.zip` | First release of the kit. Built by the tag-triggered packaging workflow; zip top-level folder is `store-assets/`. |
+
+### QA exception: planned v0.1.1 release (2026-08-10)
+
+The staged QA dry-run is intentionally skipped for the planned v0.1.1 release. The maintainer accepted this exception because the current dry-run approach has known harness limitations and is under review in Task G, while the project has limited exposure. This is not a behavioral `PASS` and does not replace the QA procedure.
+
+Static checks completed for the planned release: documentation and workflow consistency review, `git diff --check`, and release-workflow hardening review. Run no dry-run result is recorded. Before a later release uses QA as a gate, Task G must decide whether to retain, replace, or supplement the staged approach.
 
 ### Task H detail
 
@@ -193,18 +201,15 @@ record the submission in submissions/ (status = Published)
 
 ## Priority
 
-1. Complete the Microsoft Store templates and specification (Task A)
-2. Release the first artifact (Task B, released 2026-08-09 — v0.1.0)
-3. Keep lifecycle, naming, and terminology consistent across `README.md`, `starter-kit/`, templates, and examples
-4. Add the tool recommendations section to the root `README.md` (Task D)
-5. Clarify the unpacked-package user experience (Task H) and adjust the delivery artifact accordingly
+1. Keep lifecycle, naming, and terminology consistent across `README.md`, `starter-kit/`, templates, and examples.
+2. Research and decide the release-testing approach (Task G).
+3. Add the tool recommendations section to the root `README.md` (Task D).
+4. Clarify the unpacked-package user experience (Task H) and adjust the delivery artifact accordingly.
 
 ## Next steps
 
-- Run the QA procedure from `docs/QA.md` on the current kit in **staged mode** (one phase per fresh session, files-only acceptance) and record the result.
-- Research the testing approach (Task G): decide whether dry-run stays, is replaced, or is supplemented — the current method is not yet considered optimal.
+- Research the testing approach (Task G): decide whether dry-run stays, is replaced, or is supplemented before using it as a release gate. The planned v0.1.1 release is an explicit exception, recorded above.
 - Clarify and accept the concrete list for Task D with verifiable sources before writing it into `README.md`.
-- Publish the first release artifact: push tag `v0.1.0`, let `.github/workflows/release.yml` build and attach the zip, then write the release notes (planned 2026-08-09). ✅ Done — released 2026-08-09 as v0.1.0 (see "Release log").
 - Track new tasks as they are added to this doc (validation script, CLI, multi-store adapters).
 - Resolve Task H (which folder users should use after unzipping the release) and, if needed, adjust the packaging contract and release notes.
 

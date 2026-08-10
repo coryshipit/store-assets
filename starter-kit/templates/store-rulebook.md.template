@@ -1,5 +1,5 @@
 ---
-template_version: 1.0.0
+template_version: 1.1.0
 ---
 
 # {{PRODUCT_NAME}} Store Assets — Rules
@@ -11,6 +11,8 @@ It is generated from `templates/store-rulebook.md.template` with the project and
 ## 1. Placeholder policy
 
 This document is generated with the **project variables** resolved (product name, store, locale, current version).
+
+This rulebook manages updates to an existing {{STORE_DISPLAY_NAME}} listing. It does not support the application's first store submission; `current/` therefore always represents a previously published state.
 
 Per-submission values (`{{LOCALE}}`, `{{SUBMISSION_ID}}`, `{{APPLICATION_VERSION}}`, `{{PUBLICATION_DATE}}`, `{{STATUS}}`) have no value until a submission begins. In examples and file skeletons below, they appear as **literal `{{...}}` placeholders on purpose** — they are examples of what a file looks like, not values to resolve. Do not treat them as unresolved errors.
 
@@ -72,7 +74,7 @@ current/<locale>/
 
 ### `release-prep/`
 
-Contains draft assets for an upcoming submission, per locale, mirroring `current/<locale>/` so publish is a tree-level move.
+Contains the complete candidate assets for one upcoming submission, per locale, mirroring `current/<locale>/` so publish is a tree-level replacement.
 
 ```text
 release-prep/<locale>/
@@ -84,6 +86,8 @@ release-prep/<locale>/
 ```
 
 - Prepare updates only here, never in `current/`.
+- Only one active submission may exist for this store adapter. Do not begin another release preparation while a submission is `Draft`, `Submitted`, `In certification`, or `Action required`.
+- Each affected locale must be a complete snapshot of the intended live state, including any removals.
 - The submission variables live in the submission record (in `submissions/`).
 - The status field tracks the whole flow; no per-folder naming needed.
 - Use the same tree whether the update is a new build or only listing metadata and screenshots.
@@ -103,9 +107,9 @@ Records submission ID, date, application version, update type, locales, status, 
 Two template locations, kept apart on purpose:
 
 - `templates/` (package level) — the template source that generates this rulebook. The package `README.md` is static, not generated.
-- `<STORE_PLATFORM>/templates/` — store-specific record templates (listing, release notes, submission records), reserved for a later phase.
+- `<STORE_PLATFORM>/templates/` — reserved for store-specific record templates in a later phase. Until then, the file skeletons in §6 are the required source for listing, release-notes, and submission-record formats.
 
-Use an existing template instead of inventing a new structure.
+Use the §6 file skeletons instead of inventing a new structure.
 
 ## 5. Naming rules
 
@@ -122,7 +126,7 @@ Use an existing template instead of inventing a new structure.
   02-core-workflow.png
   ```
 
-  Editable files go in `screenshots/<locale>/source/`; upload-ready files in `screenshots/<locale>/export/`.
+  Editable files go in `<state>/<locale>/screenshots/source/`; upload-ready files in `<state>/<locale>/screenshots/export/`, where `<state>` is `current` or `release-prep`.
 
 ## 6. Required file contents
 

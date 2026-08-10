@@ -58,7 +58,7 @@ If a staged run is not feasible, a full run is still acceptable on the condition
 Create the fixture application project **outside the repository**, in a disposable location. It contains:
 
 - a minimal `README.md` and `AGENTS.md` (any content)
-- a PRD-like fact sheet: product name, target store, default locale, current app version, and one or two verifiable product features
+- a PRD-like fact sheet: product name, selected store adapter (`microsoft-store`), default locale, current published app version, and one or two verifiable product features
 
 The fixture is written once and reused by later runs. It holds only the inputs the workflow reads (a fake application project); it does not hold any run output.
 
@@ -67,9 +67,9 @@ The fixture is written once and reused by later runs. It holds only the inputs t
 Staged runs execute the workflow as four separate tasks, each with a fresh agent session inside the same run directory. Do not carry conversation history between tasks; each session reads only the files already in the run directory.
 
 1. **Initialize** — agent reads the workflow, creates the standard structure for the confirmed values (product name, `microsoft-store`, default locale), generates `<PRODUCT_NAME>-store-assets.md` (the rulebook), and stops. Reviewer verifies the rulebook before continuing.
-2. **Prepare an update** — agent creates `release-prep/<locale>/` (mirroring `current/`), fills listing/release-notes for one locale, never edits `current/`. Reviewer verifies the prepared files.
-3. **Record** — agent writes `submissions/<submission-id>.md` with `status: Draft` and the submission variables. Reviewer verifies the record.
-4. **Publish** — only because the session is explicitly told the app is live: agent promotes `release-prep/<locale>/` to `current/<locale>/`, sets `Published` + publication date. Reviewer verifies the promotion.
+2. **Prepare and record** — agent creates `release-prep/<locale>/` as a complete candidate snapshot, fills listing/release-notes for one locale, creates `submissions/<submission-id>.md` with `status: Draft`, and never edits `current/`. Reviewer verifies both the prepared files and record.
+3. **Track submission** — agent updates the existing record after an explicitly supplied store event, for example `Submitted` or `In certification`. Reviewer verifies the status transition and confirms no second active submission was created.
+4. **Publish** — only because the session is explicitly told the app is live: agent replaces `current/<locale>/` with the approved `release-prep/<locale>/` tree, sets `Published` + publication date, and removes the completed preparation. Reviewer verifies the promotion.
 
 Each phase's task prompt must:
 - scope the session to exactly one phase ("do only this phase, do not touch other files"),
@@ -111,8 +111,9 @@ After the run, a reviewer (or a follow-up check) verifies:
 - [ ] `store-assets/README.md` exists, is the static guide, and has no `{{...}}` placeholders.
 - [ ] The rulebook `<PRODUCT_NAME>-store-assets.md` exists, named per `{{RULEBOOK_FILE}}`; its examples may keep per-submission tokens per its §1 policy, but project values are resolved.
 - [ ] Directory names follow the rulebook's naming rules; `current/` was not modified before the publish step.
-- [ ] `release-prep/<locale>/` mirrors `current/<locale>/` structurally.
+- [ ] `release-prep/<locale>/` is a complete candidate snapshot that mirrors the intended `current/<locale>/` structure.
 - [ ] The submission record exists at `submissions/<submission-id>.md`, and its status reached `Published` only after the explicit go-live confirmation.
+- [ ] No second active submission exists for the tested store adapter.
 - [ ] No invented product capabilities appeared in the generated copy.
 - [ ] The agent could complete the whole flow from the files alone (no missing instructions); with staged runs, this holds across the four sessions collectively.
 
@@ -140,6 +141,6 @@ QA run 2026-08-08-verify-01 — PASS
 Change under test: [one line]
 Fixture: product=fake-app locale=en-US version=v1.0.0
 Conformance: all items passed
-Dry-run: initialize → prepare → record → publish completed
+Dry-run: initialize → prepare and record → track → publish completed
 Cleanliness: run dir `store-assets-qa/2026-08-08-verify-01/` created and removed; no leftover files
 ```

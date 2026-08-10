@@ -11,7 +11,7 @@ It is **not** a store backend replacement, SaaS, GUI, ASO platform, or auto-uplo
 To use Store Assets in your own app project:
 
 1. 📥 Download the latest release zip from GitHub Releases and unzip it — you get a `store-assets/` folder, ready to use.
-2. 📂 Drop `store-assets/` into your app repository (it ships with the right name, so no renaming needed).
+2. 📂 Drop `store-assets/` into your app repository (it ships with the right name, so no renaming needed). Each app project uses one independent `store-assets/` work package.
 3. 🤖 Ask an agent to read `store-assets-workflow.md` first.
 4. ✅ Run initialization, prepare a submission, or run a validation task.
 
@@ -38,4 +38,4 @@ Different stores may keep their own fields and validation rules, but the lifecyc
 
 ## 🎯 Current scope
 
-Microsoft Store is fully supported today. Apple App Store and Google Play are future directions; no specific rules are assumed for them until they are researched and verified.
+Microsoft Store updates for existing published listings are fully supported today. Store Assets does not manage an application's first store submission. Apple App Store and Google Play are future directions; no specific rules are assumed for them until they are researched and verified.

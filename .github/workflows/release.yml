@@ -4,7 +4,6 @@ on:
   push:
     tags:
       - 'v*'
-  workflow_dispatch:
 
 permissions:
   contents: write
@@ -16,6 +15,13 @@ jobs:
       - name: Check out repository
         uses: actions/checkout@v4
 
+      - name: Validate release tag
+        run: |
+          if [[ ! "${GITHUB_REF_NAME}" =~ ^v[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
+            echo "ERROR: release tags must use vX.Y.Z format"
+            exit 1
+          fi
+
       - name: Build zip
         run: |
           mkdir -p dist
@@ -24,13 +30,28 @@ jobs:
 
       - name: Verify zip layout
         run: |
-          unzip -l store-assets-starter-kit-${GITHUB_REF_NAME}.zip | head -20
-          if ! unzip -l store-assets-starter-kit-${GITHUB_REF_NAME}.zip | grep -q "store-assets/store-assets-workflow.md"; then
-            echo "ERROR: workflow missing"
+          archive="store-assets-starter-kit-${GITHUB_REF_NAME}.zip"
+          entries="$(unzip -Z1 "$archive")"
+
+          if printf '%s\n' "$entries" | grep -qv '^store-assets/'; then
+            echo "ERROR: archive contains paths outside store-assets/"
             exit 1
           fi
-          if unzip -l store-assets-starter-kit-${GITHUB_REF_NAME}.zip | grep -q "store-assets/AGENTS.md"; then
-            echo "ERROR: dev file packaged"
+
+          for required in README.md store-assets-workflow.md templates/store-rulebook.md.template; do
+            if ! printf '%s\n' "$entries" | grep -qx "store-assets/$required"; then
+              echo "ERROR: required package file missing: $required"
+              exit 1
+            fi
+          done
+
+          if printf '%s\n' "$entries" | grep -Eq '^store-assets/(AGENTS\.md|docs/|reference/)'; then
+            echo "ERROR: development files packaged"
+            exit 1
+          fi
+
+          if unzip -p "$archive" store-assets/README.md | grep -q '{{'; then
+            echo "ERROR: static README contains unresolved placeholders"
             exit 1
           fi
 
@@ -39,7 +60,11 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           if gh release view "${{ github.ref_name }}" >/dev/null 2>&1; then
-            echo "release exists"
+            if [ "$(gh release view "${{ github.ref_name }}" --json isDraft --jq '.isDraft')" != "true" ]; then
+              echo "ERROR: refusing to modify a published release"
+              exit 1
+            fi
+            echo "draft release exists"
           else
             gh release create "${{ github.ref_name }}" --draft --title "Store Assets Starter Kit ${{ github.ref_name }}" --notes "Release description to be filled in."
           fi
@@ -48,4 +73,8 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
+          if [ "$(gh release view "${{ github.ref_name }}" --json isDraft --jq '.isDraft')" != "true" ]; then
+            echo "ERROR: refusing to replace an asset on a published release"
+            exit 1
+          fi
           gh release upload "${{ github.ref_name }}" store-assets-starter-kit-${{ github.ref_name }}.zip --clobber

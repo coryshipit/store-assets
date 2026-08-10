@@ -59,10 +59,11 @@ Rules for what is included and what is not:
   ```
 
 - Existing releases are not mutated once published. A new version of the kit is a new release.
+- Release-note source files are versioned at `docs/releases/<tag>.md`. Before publishing a draft release, use the matching source file to replace the workflow's placeholder notes.
 
 ## Required workflow behavior
 
-Current status: implemented (2026-08-09) via `.github/workflows/release.yml` — a tag-triggered (`v*`) GitHub Actions workflow.
+Current status: implemented (2026-08-09) via `.github/workflows/release.yml` — a tag-triggered (`vX.Y.Z`) GitHub Actions workflow.
 
 For each release tag, the mechanism should:
 
@@ -70,15 +71,15 @@ For each release tag, the mechanism should:
 2. Keep the internal directory structure and file paths identical to the installed layout (top-level folder `store-assets/`, then the kit structure as-is).
 3. Exclude anything outside `starter-kit/`.
 4. Attach the zip to the release as an asset.
-5. Be repeatable: the same tag always produces the same artifact.
+5. Be repeatable while its GitHub Release remains a draft; published releases and their assets are never modified.
 
-The workflow packages `starter-kit/` as `store-assets/` in a zip named `store-assets-starter-kit-<tag>.zip`, verifies the layout (workflow present, no dev files), and attaches it to the release (creating a draft release first if none exists, so release notes can be written before publishing).
+The workflow only runs when a `vX.Y.Z` tag is pushed. It packages `starter-kit/` as `store-assets/` in a zip named `store-assets-starter-kit-<tag>.zip`, verifies that every archive path is under `store-assets/`, checks the static README, workflow, and rulebook template, rejects development files, and attaches the zip to a draft release. It creates the draft if needed. Re-runs may replace an asset only while that release is still a draft; a published release causes the workflow to fail rather than mutate it.
 
 ## Acceptance criteria
 
 | Criterion | Status |
 | --- | --- |
-| A release produces a downloadable, versioned plain zip whose top-level folder is `store-assets/` | todo |
-| The zip is self-contained and documents the project on its own | todo |
-| Packaging is repeatable and does not require manual steps | todo |
-| Users can copy the zip content into their project and follow `store-assets/store-assets-workflow.md` | todo |
+| A release produces a downloadable, versioned plain zip whose top-level folder is `store-assets/` | done |
+| The zip is self-contained and documents the project on its own | done |
+| Packaging is repeatable and does not require manual steps | done |
+| Users can copy the zip content into their project and follow `store-assets/store-assets-workflow.md` | done |

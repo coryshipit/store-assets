@@ -6,9 +6,10 @@ It is not a store backend, GUI, ASO platform, or auto-upload service. It standar
 
 ## How to start
 
-1. Copy this folder into your application repository as `store-assets/` (it ships named `store-assets/`, so a direct copy needs no renaming).
-2. Ask an agent to read `store-assets-workflow.md` and initialize the store assets.
-3. On the first run the agent reads the rule template, confirms a few project facts with you (product name, default locale, current app version), and generates the rulebook `<PRODUCT_NAME>-store-assets.md`. Every later task then starts from the rulebook.
+1. Copy this folder into your application repository as `store-assets/` (it ships named `store-assets/`, so a direct copy needs no renaming). Each application project uses one independent `store-assets/` work package.
+2. Ask an agent to read `store-assets-workflow.md` before initializing or doing store work.
+3. Store Assets currently manages updates to an existing Microsoft Store listing. For a new application that has not yet been published, keep the work package in the project but complete the first store submission outside this workflow.
+4. After a Microsoft Store version is live, the agent reads the rule template, confirms project facts (product name, default locale, current app version), and generates the rulebook `<PRODUCT_NAME>-store-assets.md`. Every later task then starts from the rulebook.
 
 ## How the kit is organized
 
@@ -34,7 +35,7 @@ The kit ships exactly this `README.md` plus the workflow, the templates, and the
 
 Two documents do different jobs, and their split is deliberate:
 
-- `store-assets-workflow.md` is the **process spec**. It is the same in every project and is the point of entry for every task. It also defines the variable contract in the work interface section — which placeholders mean, where their values come from, and how templates should be shipped. The contract lives there because generation is part of the process; rules knowledge stays separate.
+- `store-assets-workflow.md` is the **process spec**. It is the same in every project and is the point of entry for every task. It defines the supported store adapters and the variable contract — which placeholders mean, where their values come from, and how templates should be shipped. The contract lives there because generation is part of the process; rules knowledge stays separate.
 - `<PRODUCT_NAME>-store-assets.md` is the **project rulebook**. It is generated once from `templates/store-rulebook.md.template` with your project's values, and holds this project's structure, naming, and validation rules. Rules change per project; process never does.
 
 In one line: workflow is the protocol, rulebook is this project's resolved rules.

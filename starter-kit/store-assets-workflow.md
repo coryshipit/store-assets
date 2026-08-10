@@ -19,10 +19,14 @@ There are two entry points, and they read different files: **first setup (initia
 Then identifies:
 
 - product name
-- target store
+- target store adapter for the task
 - default locale
 - current application version
 - task: initialize
+
+Only `microsoft-store` is executable in this version. Apple App Store and Google Play directories are reserved skeletons, not adapters. If the requested store is unsupported, explain that no rules or templates exist and make no store-content changes.
+
+The Microsoft Store workflow manages updates only. Before initializing its rulebook or preparing a submission, verify that the application already has a published Microsoft Store listing and a current released version. For a first store submission, retain this work package in the project but use the store's official process outside Store Assets; do not create a submission record or release preparation here.
 
 Then generates the rulebook (§3). No other store work happens before the rulebook exists.
 
@@ -30,13 +34,13 @@ Then generates the rulebook (§3). No other store work happens before the rulebo
 
 1. This document (process).
 2. The project rulebook (`<PRODUCT_NAME>-store-assets.md`) — structure and rules.
-3. The relevant template under `templates/`.
-4. Existing files under `current/`, `release-prep/`, and `submissions/` that the task touches.
+3. The file skeletons in the rulebook; they are the Phase 1 source for listing, release-notes, and submission-record formats.
+4. Existing files under the selected store adapter's `current/`, `release-prep/`, and `submissions/` directories that the task touches.
 5. Verifiable facts in the application project: PRD, release notes, QA results, and approved screenshots.
 
 Then identifies:
 
-- task type: prepare update, validate, record status, or promote published assets
+- target store adapter and task type: prepare update, validate, record status, or promote published assets
 
 Anything that cannot be determined safely is marked as pending confirmation, not filled in.
 
@@ -49,8 +53,8 @@ The agent resolves variables before generating files. Templates keep placeholder
 | Placeholder | Meaning |
 |---|---|
 | `{{PRODUCT_NAME}}` | product display name |
-| `{{STORE_PLATFORM}}` | `microsoft-store` |
-| `{{STORE_DISPLAY_NAME}}` | `Microsoft Store` |
+| `{{STORE_PLATFORM}}` | selected store adapter; currently `microsoft-store` only |
+| `{{STORE_DISPLAY_NAME}}` | display name of the selected supported store; currently `Microsoft Store` |
 | `{{DEFAULT_LOCALE}}` | default locale, e.g. `en-US` |
 | `{{CURRENT_APP_VERSION}}` | version of the app currently released |
 
@@ -121,7 +125,6 @@ Allowed statuses:
 
 ```text
 Draft
-Ready for submission
 Submitted
 In certification
 Action required
@@ -133,20 +136,19 @@ Published
 Transitions:
 
 ```text
-Draft → Ready for submission → Submitted → In certification → Published
-        │                          │
-        └────────── Action required / Rejected ──────────────┘
-                      fixes return to Draft
+Draft → Submitted → In certification → Published
+             │              │
+             └─ Action required / Rejected → Draft
 Withdrawn can be entered at any point.
 ```
 
-Draft is the default for a new release preparation. The status is recorded in the submission record and presented to the user.
+Draft is the default for a new release preparation. The ready-for-submission checklist is the quality gate for a Draft; it does not create a separate status. The status is recorded in the submission record and presented to the user.
 
 ## 4.2 Prepare an update
 
-The agent must not edit `current/`.
+The agent must not edit `current/`. Each store adapter permits only one active submission at a time. Before preparing an update, check that no submission record is in `Draft`, `Submitted`, `In certification`, or `Action required`; if one exists, stop and ask the user to resolve or withdraw it first.
 
-1. Create `release-prep/<locale>/` for each affected locale, copying the current structure when useful.
+1. Create `release-prep/<locale>/` for each affected locale as a complete candidate snapshot of the future live state, copying `current/<locale>/` first when it exists.
 2. Update only the files inside the release preparation.
 3. Record the submission variables and status (starting at `Draft`) in the new submission record.
 4. Validate using the ready-for-submission checklist in the rulebook before presenting the draft.
@@ -162,9 +164,9 @@ The agent must not edit `current/`.
 
 Only after the user explicitly confirms the app is live:
 
-1. Copy the approved materials from `release-prep/<locale>/` into `current/<locale>/`.
+1. Replace each affected `current/<locale>/` tree with the approved `release-prep/<locale>/` tree, so removed files do not remain as live assets.
 2. Record `status: Published` and the publication date in the submission record.
-3. Archive or clean up the completed `release-prep/` content per the user's convention.
+3. Remove the completed `release-prep/` content after promotion. Git history preserves the prior live state.
 4. Confirm the repository assets match the live store page.
 
 The agent must not set `Published` or update `current/` without that explicit confirmation.
