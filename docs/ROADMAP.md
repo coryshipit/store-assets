@@ -159,12 +159,13 @@ update the submission record (status = Published)
 | Release | Date | Asset | Notes |
 | --- | --- | --- | --- |
 | v0.1.0 | 2026-08-09 | `store-assets-starter-kit-v0.1.0.zip` | First release of the kit. Built by the tag-triggered packaging workflow; zip top-level folder is `store-assets/`. |
+| v0.1.1 | 2026-08-10 | `store-assets-starter-kit-v0.1.1.zip` | Published release. The package was manually downloaded and extracted; its contents were verified to match the required layout. |
 
-### QA exception: planned v0.1.1 release (2026-08-10)
+### QA exception: v0.1.1 release (2026-08-10)
 
-The staged QA dry-run is intentionally skipped for the planned v0.1.1 release. The maintainer accepted this exception because the current dry-run approach has known harness limitations and is under review in Task G, while the project has limited exposure. This is not a behavioral `PASS` and does not replace the QA procedure.
+The staged QA dry-run was intentionally skipped for the v0.1.1 release. The maintainer accepted this exception because the current dry-run approach has known harness limitations and is under review in Task G, while the project has limited exposure. This is not a behavioral `PASS` and does not replace the QA procedure.
 
-Static checks completed for the planned release: documentation and workflow consistency review, `git diff --check`, and release-workflow hardening review. Run no dry-run result is recorded. Before a later release uses QA as a gate, Task G must decide whether to retain, replace, or supplement the staged approach.
+Static checks completed for the release: documentation and workflow consistency review, `git diff --check`, and release-workflow hardening review. Run no dry-run result is recorded. Before a later release uses QA as a gate, Task G must decide whether to retain, replace, or supplement the staged approach.
 
 ### Task H detail
 
