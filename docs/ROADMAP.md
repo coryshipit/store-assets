@@ -151,7 +151,7 @@ update the submission record (status = Published)
 | D | Add tool recommendations to the root README | pending | recommend complementary ecosystem tools so users pick what fits their target store |
 | E | Finalize the starter-kit structure under the two mechanisms | done | structure implemented in `starter-kit/` per the "Finalized starter-kit design" section |
 | F | Establish a QA procedure for the starter kit | done | `docs/QA.md` defines conformance + dry-run checks; staged dry-run mode adopted (2026-08-08) after three full-run attempts ended in headless-agent silence — judged by files, not by the agent's final message; dry-run fixture project exists but no full pass recorded yet. The v0.1.1 release exception is recorded below. |
-| G | Research and optimize the testing approach | pending | the staged dry-run is an interim method; the overall testing approach needs further research — dry-run may not be the optimal solution (recorded 2026-08-08). This research is required before treating a future dry-run result as a release gate. |
+| G | Research and optimize the testing approach | pending | Testing strategy design is recorded in [`TESTING-STRATEGY.md`](TESTING-STRATEGY.md). The staged dry-run is an interim method; the overall testing approach needs further research — dry-run may not be the optimal solution (recorded 2026-08-08). This research is required before treating a future dry-run result as a release gate. |
 | H | Clarify the unpacked-package user experience | proposed | first-time users may not know which folder to use after unzipping the release; improve the delivery artifact and make usage instructions explicit (2026-08-09) |
 
 ### Release log
