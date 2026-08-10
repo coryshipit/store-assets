@@ -146,7 +146,7 @@ update the submission record (status = Published)
 | ID | Task | Status | Notes |
 | --- | --- | --- | --- |
 | A | Complete Microsoft Store templates and specification | done | workflow (process) + rulebook template + static README implemented in `starter-kit/`; record templates deferred to the variables.yaml version |
-| B | Establish the starter-kit release mechanism | done | packaging contract in `docs/DISTRIBUTION.md` (zip top-level folder `store-assets/`); tag-triggered packaging workflow implemented in `.github/workflows/release.yml` (2026-08-09), hardened on 2026-08-10 to accept only `vX.Y.Z` tags, validate package contents, and prohibit mutation of published releases; first release published 2026-08-09 (v0.1.0, see "Release log") |
+| B | Establish the starter-kit release mechanism | done | packaging contract in `docs/DISTRIBUTION.md` (zip top-level folder `store-assets/`); tag-triggered packaging workflow implemented in `.github/workflows/release.yml` (2026-08-09), hardened on 2026-08-10 to accept only `vX.Y.Z` tags, validate package contents, and prohibit mutation of published release assets; first release published 2026-08-09 (v0.1.0, see "Release log") |
 | C | Convert documentation to English | done | all docs now English, including the root `README.md` (translated 2026-08-09) |
 | D | Add tool recommendations to the root README | pending | recommend complementary ecosystem tools so users pick what fits their target store |
 | E | Finalize the starter-kit structure under the two mechanisms | done | structure implemented in `starter-kit/` per the "Finalized starter-kit design" section |

@@ -58,8 +58,8 @@ Rules for what is included and what is not:
   store-assets-starter-kit-v1.0.0.zip
   ```
 
-- Existing releases are not mutated once published. A new version of the kit is a new release.
-- Release-note source files are versioned at `docs/releases/<tag>.md`. Before publishing a draft release, use the matching source file to replace the workflow's placeholder notes.
+- Published release assets are not mutated. A new version of the kit is a new release.
+- Release-note source files are versioned at `docs/releases/<tag>.md`. Before publishing a draft release, use the matching source file to replace the workflow's placeholder notes. Published release-note metadata may be corrected for factual clarity when its source file is updated in the repository.
 
 ## Required workflow behavior
 
@@ -71,7 +71,7 @@ For each release tag, the mechanism should:
 2. Keep the internal directory structure and file paths identical to the installed layout (top-level folder `store-assets/`, then the kit structure as-is).
 3. Exclude anything outside `starter-kit/`.
 4. Attach the zip to the release as an asset.
-5. Be repeatable while its GitHub Release remains a draft; published releases and their assets are never modified.
+5. Be repeatable while its GitHub Release remains a draft; published release assets are never modified.
 
 The workflow only runs when a `vX.Y.Z` tag is pushed. It packages `starter-kit/` as `store-assets/` in a zip named `store-assets-starter-kit-<tag>.zip`, verifies that every archive path is under `store-assets/`, checks the static README, workflow, and rulebook template, rejects development files, and attaches the zip to a draft release. It creates the draft if needed. Re-runs may replace an asset only while that release is still a draft; a published release causes the workflow to fail rather than mutate it.
 
