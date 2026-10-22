@@ -4,7 +4,7 @@ Date: 2026-10-22
 
 Branch: `iteration/dirpilot-feedback`
 
-Status: plan accepted on 2026-10-22; I.1/I.2 rules/examples implemented, independent behavior verification pending
+Status: plan accepted on 2026-10-22; I.1/I.2 rules/examples and I.3 checker implemented; independent workflow-agent verification remains pending
 
 ## 1. Purpose and evidence
 
@@ -84,7 +84,7 @@ Acceptance:
 Development work:
 
 1. Stabilize the record fields and their parsing contract from I.1/I.2 before implementing checks. Do not force all stores into a universal metadata schema.
-2. Define the input root/store, write scope (none), findings, failure modes, and runtime requirements. Proposed delivery is one portable Python 3 standard-library script under `starter-kit/`, with an explicit input path; finalize its filename and supported runtime after the contract review. No installation service or automatic repair is needed.
+2. Define the input root/store, write scope (none), findings, failure modes, and runtime requirements. Delivered as `starter-kit/scripts/check-store-assets.mjs`, one Node.js 22+ standard-library module with an explicit input root. The original Python candidate was replaced after runtime review: the development environment has Node.js 24 and no usable Python interpreter, so no additional runtime installation or third-party dependency is needed here. No installation service or automatic repair is included.
 3. Check candidate-to-record association, active submission count, allowed statuses, task-dependent fields, locale coverage, referenced files, project placeholders, and durable snapshot references. Distinguish an unused directory containing only `.gitkeep` from a real candidate.
 4. Define applicability by lifecycle stage. A new Draft need not already have a submitted snapshot. Archived references resolve against their recorded Git revision, not only today's filesystem. Check legal transitions from event evidence where available; do not infer transition history from a valid current status alone.
 5. Allow recorded additions/removals and store-wide assets; do not equate candidate completeness with byte-for-byte equality to `current/` or assume every asset belongs to a locale.
@@ -179,9 +179,9 @@ For each stage, review the spec/template diff, applicable checks, remaining unce
 | Decision | Recommended starting position | Settle before |
 | --- | --- | --- |
 | First submission | Retain updates-only scope; consider separately | Any scope expansion |
-| Record format and legacy fields | Implemented in template 1.3.0: readable attempt/event sections, distinct date meanings, explicit pending/unknown values and legacy interpretation notes | Review before I.3 parsing is finalized |
+| Record format and legacy fields | Implemented in template 1.4.0: readable attempt/event sections, explicit checkable path/status-note conventions, distinct date meanings and deliberate legacy handling | I.3 parser/tests implemented; custom/legacy gaps remain review findings |
 | Snapshot timing and resubmission references | Implemented in I.2: approved full candidate commit precedes its record reference; retain every attempt, reverify before promotion, expose unavailable history | Independent behavior verification pending |
-| Checker runtime and format | One optional Python 3 standard-library script with explicit input and no writes | I.3 implementation |
+| Checker runtime and format | Delivered: one optional Node.js 22+ standard-library module, explicit root/store, text/JSON findings, exit 0/1/2, no writes or network retrieval | I.3 runtime decision settled; standalone tests passed on Node.js 24 / Git for Windows |
 | Asset inventory location and shared assets | Decide from verified Microsoft roles; preserve screenshot conventions | I.4 implementation |
 | Provenance storage | One compact origin/adaptation record; unknown is allowed | I.5 implementation |
 | Test strategy and release gate | Focused deterministic and agent evidence; explicit handling of inconclusive runs | First behavioral change; release review |

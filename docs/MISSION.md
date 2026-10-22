@@ -25,6 +25,7 @@ The user-facing package plays the role that the reference project layout drafts 
 | Security rules | `templates/store-rulebook.md.template` §8 |
 | Ready-for-submission checklist | `templates/store-rulebook.md.template` §9 |
 | Package entry document | static `README.md` (shipped in `starter-kit/`, no placeholders) |
+| Optional structural checks | `checking.md` + `scripts/check-store-assets.mjs` (read-only; does not authenticate evidence or publish) |
 
 Intentional differences from the reference layout:
 

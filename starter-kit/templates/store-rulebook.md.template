@@ -1,5 +1,5 @@
 ---
-template_version: 1.3.0
+template_version: 1.4.0
 ---
 
 # {{PRODUCT_NAME}} Store Assets — Rules
@@ -31,12 +31,15 @@ These are initialization facts. Before preparing an update, confirm the currentl
 store-assets/
 ├── store-assets-workflow.md      # process spec
 ├── README.md                     # static package overview
+├── checking.md                   # optional read-only checker usage and result meanings
 ├── {{RULEBOOK_FILE}}             # this document
 ├── templates/                    # package-level template sources
 │   └── store-rulebook.md.template
 ├── examples/
 │   ├── update-tasks.md            # fictional task and field examples; not live records
 │   └── submission-history.md      # snapshot, resubmission, and time examples
+├── scripts/
+│   └── check-store-assets.mjs      # optional single-file Node.js checker; no dependencies
 ├── {{STORE_PLATFORM}}/
 │   ├── current/                  # live published assets, per locale
 │   ├── release-prep/             # draft assets, per locale
@@ -230,6 +233,7 @@ Field rules for a new or resumed preparation:
 - `Submission date`: known occurrence date of the latest actual submitted attempt; leave empty before submission or if that attempt's date is unknown. Earlier dates remain in Events.
 - `Publication date`: evidenced platform publication date only. `Publication confirmed date`: date explicit user go-live confirmation was received. Published status with an empty platform date is valid when only confirmation is known.
 - `Submitted files`: label paths as candidate files while Draft; list their intended roles and planned additions/removals. A path is not proof that it was uploaded, reviewed, or approved.
+- For checkable file references, use one bullet with a backtick-quoted kit-relative path or Markdown link per path; a directory reference explicitly includes descendants. Bare legacy paths without spaces are also recognized. Unstructured prose requires review. Snapshot paths below remain relative to the application Git root, not this record or the kit.
 - `Open items`: list missing facts, incomplete candidate files, checks, and user decisions with the affected action. Use `None` only when no open items remain.
 
 Do not carry literal `{{...}}` tokens into an actual submission or listing. Use the allowed pending values for unknown facts and `Not applicable` only when the task type makes a field inapplicable. A package-update cannot pass readiness with pending target version or package evidence; a listing-only update is not blocked by absent new-package fields marked not applicable.
@@ -274,6 +278,7 @@ Notes:
 ```
 
 - `Event`: `draft-created`, `submitted`, `status-observed`, `draft-reopened`, `platform-published`, `go-live-confirmed`, `promoted`, or `correction`. `draft-reopened` records the local return to Draft for confirmed review fixes, with its authorization/source; it is not a store verdict. Record observed status and any external ID in Notes where relevant; do not invent intermediate events.
+- For a machine-readable `status-observed` event, write `Notes: Status: In certification; source limitations` using the actual reported status. Unstructured older notes remain reviewable evidence; do not rewrite them to imply an unobserved transition.
 - `Attempt`: the relevant local attempt number; `Not applicable` for record-level events; `Unknown` only when the association itself is not established and is listed as an open item.
 - `Occurred at`: when the action actually happened, as supported by the source. Use an ISO 8601 timestamp with explicit UTC offset, a date-only `YYYY-MM-DD` if that is the known precision, or `Unknown`.
 - `Occurred timezone`: timezone/UTC offset for a date-only occurrence when known, or `Unknown`; full timestamps already carry their offset. Never turn a known date into midnight or assume a source's timezone.
@@ -333,6 +338,8 @@ A release preparation is ready only when:
 - [ ] User has reviewed the final package.
 - [ ] Before submission handoff, the approved complete candidate is bound to a verified full commit/path snapshot in its attempt; preparation alone is not an actual submitted event.
 - [ ] Event sources and time meanings are explicit; unknown external times and unsupported legacy interpretations remain unknown. A source field alone does not prove external publication.
+
+The optional `scripts/check-store-assets.mjs` reports structural errors, review items, and informational findings using this format. Its command/runtime/exit-code contract lives in `checking.md` at package root. It never repairs files or proves external facts; a zero exit code does not replace this checklist. Unsupported legacy/custom formats require deliberate review.
 
 ---
 

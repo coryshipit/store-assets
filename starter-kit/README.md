@@ -17,11 +17,14 @@ If candidate files already exist without their own record, ask the agent to insp
 
 Before actual submission, bind the approved complete candidate to a verified Git commit and its repository-relative paths. Keep each attempt's reference after promotion or review fixes. Record store event times separately from when you learned or wrote them down: "it is live now" confirms publication, but does not establish the platform's publication timestamp. See [submission history examples](examples/submission-history.md).
 
+For a read-only structural check, run `node store-assets/scripts/check-store-assets.mjs --root store-assets` from your application root (Node.js 22+). It reports errors and review items without modifying files. See [checking.md](checking.md) for Git requirements, record syntax, and exit codes; zero errors does not mean ready for submission.
+
 ## How the kit is organized
 
 ```text
 store-assets/
 ├── README.md                       # this file — static package overview
+├── checking.md                     # optional checker usage and result meanings
 ├── store-assets-workflow.md       # process spec — how every task runs
 ├── <PRODUCT_NAME>-store-assets.md  # generated rulebook — this project's rules
 ├── templates/
@@ -29,6 +32,8 @@ store-assets/
 ├── examples/
 │   ├── update-tasks.md            # fictional task examples, not application data
 │   └── submission-history.md      # durable snapshots and event/date meanings
+├── scripts/
+│   └── check-store-assets.mjs      # read-only structural checks, Node.js standard library
 ├── microsoft-store/
 │   ├── current/                  # live, published assets (per locale)
 │   ├── release-prep/             # draft assets (per locale)
@@ -38,7 +43,7 @@ store-assets/
 └── google-play/                  # reserved skeleton (future adapter)
 ```
 
-The kit ships this static `README.md`, the workflow, templates, fictional examples, and store folders. It ships no repository development files (`AGENTS.md`, `docs/`, or `tests/`). The rulebook is created by the first run; until then the workflow and template supply the executable process and rules. Examples illustrate those rules and are never copied into a live submission as facts.
+The kit ships this static `README.md`, the workflow, checking guide/script, templates, fictional examples, and store folders. It ships no repository development files (`AGENTS.md`, `docs/`, or `tests/`). The rulebook is created by the first run; until then the workflow and template supply the executable process and rules. Examples illustrate those rules and are never copied into a live submission as facts.
 
 ## Workflow vs rulebook
 

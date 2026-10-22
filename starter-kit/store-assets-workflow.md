@@ -46,6 +46,8 @@ When preparing an update, also identify its update type (§2.1), the confirmed r
 
 Anything that cannot be determined safely is marked as pending confirmation, not filled in.
 
+For a validation task or before handing off prepared/updated records, run the optional read-only checker when its runtime is available: `node scripts/check-store-assets.mjs --root .` from the kit directory. See [checking.md](checking.md) for requirements, output, and limits. Resolve errors or list them as explicit incomplete work; review findings are not automatically resolved by a zero exit code. If the runtime/check is unavailable, report that limitation and perform the applicable rulebook checks manually, without claiming an automated PASS.
+
 ## 2. Variable interface
 
 The agent resolves project variables before generating the rulebook. For a submission, establish task identity, update type, confirmed released application version, and scope first; mark other unavailable facts as `Pending — <reason>` instead of inventing them. Templates keep placeholder names; generated files receive resolved values or the explicitly allowed pending/not-applicable values below. Do not do a blind repository-wide replacement; historical records and `current/` keep their values.

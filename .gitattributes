@@ -1,4 +1,4 @@
-﻿# Default: normalize detected text files to LF
+# Default: normalize detected text files to LF
 * text=auto eol=lf
 
 # Define an explicit binary-file attribute:
@@ -17,6 +17,7 @@
 *.csv         text eol=lf
 *.tsv         text eol=lf
 *.svg         text eol=lf
+*.mjs         text eol=lf
 
 # Images
 *.png         binaryfile

@@ -6,10 +6,12 @@ It is a technical document for the repository itself. It is not user-facing usag
 
 ## What is tested
 
-The starter kit is a spec plus templates plus agent instructions, not a program. QA checks two invariants:
+The starter kit combines a specification, templates, agent instructions, and an optional read-only checker. QA distinguishes package conformance, checker implementation behavior, and independent agent execution:
 
 1. **Conformance** — the files always obey the rules defined in the kit's templates (`templates/store-rulebook.md.template`) and the process spec (`starter-kit/store-assets-workflow.md`): structure, naming, placeholder discipline, and prohibited content.
 2. **Behavior** — a fresh agent session given only the copied kit can run the workflow on a fixture project and produce output that matches the spec.
+
+The checker's automated tests validate deterministic findings, exit codes, standalone use, and absence of writes. They are implementation tests, not independent agent behavior verification.
 
 Conformance checks are required whenever the kit changes. Select behavioral scenarios for the rules that changed; a wording or navigation edit does not require a full lifecycle run. Assess results from files and observable actions, not an agent's final claim.
 
@@ -27,6 +29,8 @@ The iteration adopts the following limited adjustment after reviewing the `testi
 Reusable facts, prompts, input states, and expected invariants belong under `tests/fixtures/`. They contain no real application data. Their execution copies and per-run logs remain outside the repository. [Update-task scenarios](../tests/fixtures/update-tasks/README.md) cover I.1.
 
 [Submission-history scenarios](../tests/fixtures/submission-history/README.md) cover I.2. Their PowerShell artifact exercise uses local disposable Git repositories to verify snapshot retrieval, resubmissions, promotion/removals, dirty or missing content, and time/source recording. Its constructed artifacts demonstrate the reference contract; they are not a fresh-agent behavior PASS or the I.3 application validator.
+
+[Checker scenarios](../tests/fixtures/checker/README.md) cover I.3 with the executable Node.js test suite. Run `node --test --test-reporter=spec tests/check-store-assets.test.mjs` after changing its parser, rules, Git access, output, or packaged invocation. Tests compare file/content inventories including local Git metadata, and exercise the script copied outside this repository. The user-facing invocation, parsing scope, and limits live in `starter-kit/checking.md`.
 
 For each evidence item use `PASS`, `FAIL`, or `INCONCLUSIVE`. Record a scenario that was not attempted as `not run`, with the reason; do not call it PASS or INCONCLUSIVE. Silence, timeout, or a tool failure is INCONCLUSIVE only when the available artifacts cannot decide the result. Retry an inconclusive scenario at most once, then report the evidence and limitation without assuming a harness or product cause.
 
@@ -46,6 +50,7 @@ Static, per-file checks. Do not modify any file to pass a check — fix the kit,
   - `store-assets-workflow.md` at kit root
   - a static `README.md` at kit root
   - `templates/store-rulebook.md.template` at package level
+  - `checking.md` and `scripts/check-store-assets.mjs` shipped together
   - `microsoft-store/{current, release-prep, submissions, templates}/` present
   - `apple-app-store/` and `google-play/` present as empty reserved skeletons (each with `current`, `release-prep`, `submissions`, `templates`)
 - [ ] **Static README**: the kit ships exactly one `README.md` (a static package overview, zero placeholders), plus the workflow and the rulebook template. It ships no `AGENTS.md`.
@@ -58,6 +63,7 @@ Static, per-file checks. Do not modify any file to pass a check — fix the kit,
 - [ ] **Terminology consistent**: lifecycle terms (current / release-prep / submissions / publish) match across the static `README.md`, `store-assets-workflow.md`, and the rulebook template.
 - [ ] **Historical references**: attempt examples use complete candidate scope and distinguish working paths from immutable Git references. No new requirement assumes the referencing record is already inside its assets commit.
 - [ ] **Time semantics**: actual submission/platform dates, go-live receipt dates, and event observation/recording times are distinct. Published status is compatible with an unknown platform date; legacy dates are not silently reinterpreted.
+- [ ] **Checker delivery**: the copied CLI runs without repository-only imports/npm dependencies; no files, Git index/config/objects, or submission facts are changed. Test errors/review/incomplete outcomes independently; exit 0 is not a readiness assertion.
 
 ## Dry-run behavior check
 

@@ -29,12 +29,15 @@ The package must contain a fully self-contained working copy. Inside the zip, th
 ```text
 store-assets/
 ├── README.md                       # static package overview
+├── checking.md                     # optional checker usage and result meanings
 ├── store-assets-workflow.md       # process spec
 ├── templates/                     # document template sources
 │   └── store-rulebook.md.template
 ├── examples/
 │   ├── update-tasks.md            # fictional task examples
 │   └── submission-history.md      # snapshot and time examples
+├── scripts/
+│   └── check-store-assets.mjs      # standalone Node.js standard-library checker
 ├── microsoft-store/
 │   ├── current/
 │   ├── release-prep/
@@ -51,6 +54,7 @@ Rules for what is included and what is not:
 - Rename the top-level folder from `starter-kit/` to `store-assets/` when building the zip.
 - Do not include the root repo's development documents (e.g. `reference/`, `docs/`, root `README.md`, root `AGENTS.md`).
 - The packaged kit must be readable and usable on its own, without any context from the repository.
+- Include the optional checker and its guide. No dependency install or repository-only module is needed; Node.js is supplied by the application developer. The release archive check requires these files but does not run an application's validation or upload anything to a store.
 
 ## Versioning and release artifacts
 

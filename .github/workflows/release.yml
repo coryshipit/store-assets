@@ -38,14 +38,14 @@ jobs:
             exit 1
           fi
 
-          for required in README.md store-assets-workflow.md templates/store-rulebook.md.template; do
+          for required in README.md checking.md store-assets-workflow.md templates/store-rulebook.md.template scripts/check-store-assets.mjs examples/update-tasks.md examples/submission-history.md; do
             if ! printf '%s\n' "$entries" | grep -qx "store-assets/$required"; then
               echo "ERROR: required package file missing: $required"
               exit 1
             fi
           done
 
-          if printf '%s\n' "$entries" | grep -Eq '^store-assets/(AGENTS\.md|docs/|reference/)'; then
+          if printf '%s\n' "$entries" | grep -Eq '^store-assets/(AGENTS\.md|docs/|reference/|tests/)'; then
             echo "ERROR: development files packaged"
             exit 1
           fi

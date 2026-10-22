@@ -69,4 +69,4 @@ If later supplied platform evidence reports only `2026-10-23` with timezone `Asi
 - If an external submission/publication already happened, retain its reported event/status even if local traceability is incomplete. Backfill only from evidence of the actual submitted content.
 - A legacy `Publication date: 2026-10-09` may mean the date a user confirmed go-live. Preserve that value and explain its known/unknown meaning in Review notes. Do not silently relabel it as a platform date or fabricate original observation times. Add a correction/evidence entry when clarification is obtained, retaining old/new values and the source.
 
-These examples require manual Git and record handling. The consistency-check script planned for a later stage has not been implemented here.
+These examples require deliberate Git and record handling. The [read-only checker](../checking.md) can inspect structural references and structured events, but it does not create snapshots, migrate records, authenticate external sources, or perform promotion.

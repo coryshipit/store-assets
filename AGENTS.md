@@ -13,6 +13,7 @@ The repository currently maintains:
 - reusable templates
 - agent instructions
 - a QA dry-run procedure for the starter kit
+- a lightweight read-only checker for the supported Microsoft Store work package
 
 The workflow itself is not limited to one store — Microsoft Store is simply the first store for which rules are fully researched and implemented. Do not expand into GUI, SaaS, automated publishing, complex CLI, CI services, or Apple / Google rules without an explicit task and a stable specification.
 

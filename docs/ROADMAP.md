@@ -73,18 +73,23 @@ Consolidated from the discussion above. This is the agreed Phase 1 target for `s
 
 **Refinement (2026-10-23, Task I.2):** submission records retain numbered attempts bound to full Git commit IDs and repository-relative candidate paths, plus sourced occurrence/observation/recording times. User go-live receipt is separate from an unknown platform publication date. Referenced asset commits precede their record updates; historical references survive current/prep replacement. Published status and a pending local archive gap may coexist; the next preparation waits for that archive gap to be resolved.
 
+**Refinement (2026-10-23, Task I.3):** the kit includes an optional standalone Node.js 22+ structural checker and `checking.md`. Findings distinguish errors, review items, and information; exit 0 is not readiness. The runtime replaces the earlier Python candidate because Node.js is already available in the development environment. Canonical readable records have explicit path bullets and structured status notes; unknown/legacy evidence is reviewed without migration. This is a small read-only tool, not the future general CLI or publishing integration.
+
 ### 1. Starter-kit directory (after copying into the user project as `store-assets/`)
 
 ```text
 store-assets/
 ├── store-assets-workflow.md          # Bootstrap/process doc: how an agent runs the workflow (no product values)
 ├── README.md                         # Static package overview (no placeholders, not generated)
+├── checking.md                       # Optional structural-checker contract and usage
 ├── <PRODUCT_NAME>-store-assets.md    # Generated rules doc (from templates/store-rulebook.md.template)
 ├── templates/                        # Package-level template sources
 │   └── store-rulebook.md.template    # Placeholder source; resolved into the per-product rules doc
 ├── examples/                         # Fictional user-facing task examples (added in Task I.1)
 │   ├── update-tasks.md
 │   └── submission-history.md
+├── scripts/
+│   └── check-store-assets.mjs         # Single-file standard-library Node.js checker
 ├── apple-app-store/                  # Reserved skeleton (future phase; no rules assumed)
 ├── google-play/                      # Reserved skeleton (future phase; no rules assumed)
 └── microsoft-store/
@@ -156,9 +161,9 @@ update the submission record (status = Published)
 | D | Add tool recommendations to the root README | pending | recommend complementary ecosystem tools so users pick what fits their target store |
 | E | Finalize the starter-kit structure under the two mechanisms | done | structure implemented in `starter-kit/` per the "Finalized starter-kit design" section |
 | F | Establish a QA procedure for the starter kit | done | `docs/QA.md` defines conformance + dry-run checks; staged dry-run mode adopted (2026-08-08) after three full-run attempts ended in headless-agent silence — judged by files, not by the agent's final message; dry-run fixture project exists but no full pass recorded yet. The v0.1.1 release exception is recorded below. |
-| G | Research and optimize the testing approach | in progress | Task I.1 adopted a focused conformance/artifact/fresh-agent/release evidence distinction in `docs/QA.md` and added versioned scenario inputs. Independent behavior coverage, the broader strategy, and release-gate evaluation remain unfinished; the `testing/qa-strategy` proposal was reviewed, not merged wholesale. |
+| G | Research and optimize the testing approach | in progress | Focused conformance/artifact/fresh-agent/release evidence distinctions are in `docs/QA.md`. I.3 adds deterministic checker implementation tests and copied-CLI/read-only evidence. Independent workflow-agent coverage, broader strategy, and release-gate evaluation remain unfinished; the `testing/qa-strategy` proposal was reviewed, not merged wholesale. |
 | H | Clarify the unpacked-package user experience | proposed | first-time users may not know which folder to use after unzipping the release; improve the delivery artifact and make usage instructions explicit (2026-08-09) |
-| I | Iterate from DirPilot usage feedback | in progress | Staged plan accepted 2026-10-22; I.1/I.2 rules/examples implemented, with independent behavior verification pending. See [`DIRPILOT-ITERATION.md`](DIRPILOT-ITERATION.md). First milestone: listing-only task semantics, historical evidence, and read-only omission checks. |
+| I | Iterate from DirPilot usage feedback | in progress | I.1/I.2 rules/examples and I.3 checker implemented. The first milestone's mechanisms are available; independent workflow-agent verification remains pending. See [`DIRPILOT-ITERATION.md`](DIRPILOT-ITERATION.md). |
 
 ### Task I stages
 
@@ -168,7 +173,7 @@ Detailed changes, dependencies, compatibility work, and acceptance criteria live
 | --- | --- | --- | --- |
 | I.1 | P0 | Prepare a listing/asset-only update with correct version applicability and its own Draft | implemented; independent behavior verification pending |
 | I.2 | P0 | Preserve submitted asset references and distinguish event dates from confirmation dates | implemented; independent behavior verification pending |
-| I.3 | P0 | Detect orphan candidates and structural record errors with a read-only check | planned |
+| I.3 | P0 | Detect orphan candidates and structural record errors with a read-only check | implemented; 47 checker tests passed |
 | I.4 | P1 | Map Logo and other supported assets to verified store upload roles and sources | planned |
 | I.5 | P1 | Record upstream/local provenance and preserve adaptations during manual upgrades | planned |
 | I.6 | P1 | Make new-session startup, handoff, and focused QA reproducible from project files | planned |
@@ -176,6 +181,8 @@ Detailed changes, dependencies, compatibility work, and acceptance criteria live
 I.1 review evidence (2026-10-23): template `1.2.0` defines task/field applicability, Draft-first preparation, orphan recovery, and legacy-record handling. Standalone artifact exercises for listing-only preparation, mixed updates with missing package evidence, unknown target version, and confirmed orphan recovery passed; live asset hashes were preserved and temporary execution copies removed. Layout/token/link checks and a local archive check passed. Fresh-agent scenarios were not run: this task used the development session plus deterministic artifact construction, not an isolated agent executor. Conflict/continuation, ambiguous ownership, legacy, and first-submission scenarios are specified as reusable fixtures and reviewed against the rules, but have no independent behavior result. This is not a complete behavioral PASS or a release check.
 
 I.2 review evidence (2026-10-23): template `1.3.0` adds attempt snapshot references, creation/confirmation summaries, event sources/times, resubmission history, and explicit pending-promotion handling. The repeatable exercise at `tests/exercises/submission-history.ps1` passed 49 constructed-artifact assertions in disposable local Git repositories: rejection/correction, two promotions and a removal, historical retrieval, non-self-referencing asset commits, dirty/untracked/ignored content, missing shallow history/path, non-Git input, and unknown/date-only/legacy time evidence. Temporary artifacts were removed. Independent fresh-agent verification remains not run; these constructed artifacts are not an independent behavior PASS or an actual release-asset check.
+
+I.3 review evidence (2026-10-23): template `1.4.0` and the copied kit ship a single read-only Node.js checker plus usage/format guidance. `node --test --test-reporter=spec tests/check-store-assets.test.mjs` passed 47 implementation tests on Node.js 24.18.0 and Git 2.54.0 for Windows, including orphan/multiple-record cases, applicable/pending fields, planned removals/shared assets, missing links, legacy gaps, events/dates, correct latest/unknown attempt association, SHA-1/SHA-256 history, shallow/missing/runtime failures, disabled filters, CLI copying, and before/after content inventories including Git metadata. The I.2 49-assertion artifact regression also passed. Layout, placeholder, relative-link, local ZIP inclusion, and extracted-package CLI checks passed; temporary directories were removed. These are executable checker tests, not independent workflow-agent verification or an actual release-asset check.
 
 ### Release log
 
@@ -234,7 +241,7 @@ Current iteration (2026-10-22): work through Task I one stage at a time, in the 
 
 ## Next steps
 
-- Review I.1/I.2 and their outstanding independent behavior coverage. Next is I.3: implement the read-only checker against the now documented task, attempt, event, and applicability rules.
+- Review the first milestone (I.1-I.3) and its outstanding independent workflow-agent coverage. Next is I.4: verify Microsoft Logo roles/specifications before designing the smallest compatible asset inventory and upload mapping.
 - Research the testing approach (Task G): decide whether dry-run stays, is replaced, or is supplemented before using it as a release gate. The planned v0.1.1 release is an explicit exception, recorded above.
 - Clarify and accept the concrete list for Task D with verifiable sources before writing it into `README.md`.
 - Track new tasks as they are added to this doc (validation script, CLI, multi-store adapters).
