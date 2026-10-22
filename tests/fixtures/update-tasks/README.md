@@ -21,6 +21,7 @@ Expected:
 - Exactly one new Draft: `submissions/2026-10-22-logo-refresh.md`.
 - Released and candidate application versions both `1.0.0`; type `listing-only`; new-package version/evidence both `Not applicable`.
 - Store ID is pending, submission/publication dates empty, review gaps explicit.
+- Draft creation date/event reflect the known local creation operation, not the date embedded in the requested record ID. Submission attempts remains explicitly unfrozen until approval and verification; no store or promotion event is invented.
 - `release-prep/en-US/` is a complete copy of the live tree except the intended Logo replacement. Listing and release-notes bytes match the baseline.
 - `current/` checksums unchanged; candidate Logo equals the supplied replacement, not the live Logo.
 - No new package, invented version, unresolved project token, or unsupported readiness/publication claim.

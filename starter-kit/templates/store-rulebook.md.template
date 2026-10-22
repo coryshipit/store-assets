@@ -1,5 +1,5 @@
 ---
-template_version: 1.2.0
+template_version: 1.3.0
 ---
 
 # {{PRODUCT_NAME}} Store Assets — Rules
@@ -35,7 +35,8 @@ store-assets/
 ├── templates/                    # package-level template sources
 │   └── store-rulebook.md.template
 ├── examples/
-│   └── update-tasks.md            # fictional task and field examples; not live records
+│   ├── update-tasks.md            # fictional task and field examples; not live records
+│   └── submission-history.md      # snapshot, resubmission, and time examples
 ├── {{STORE_PLATFORM}}/
 │   ├── current/                  # live published assets, per locale
 │   ├── release-prep/             # draft assets, per locale
@@ -74,7 +75,8 @@ current/<locale>/
 
 - Must not be edited while preparing an update.
 - Must not be replaced until the user confirms the new submission is live.
-- Older published versions are preserved through Git history.
+- If a newer publication is confirmed but promotion is unfinished, this remains the last archived baseline; report the archive gap instead of claiming it matches the latest live state.
+- Older published versions are preserved through retained Git history. Each submitted attempt also records its immutable commit/path reference; today's `current/` path is not a historical snapshot identifier.
 
 ### `release-prep/`
 
@@ -108,6 +110,8 @@ submissions/<submission-id>.md
 ```
 
 Records repository submission ID, date, released and candidate application versions, update type, new-package applicability/evidence, optional store-issued ID, locales, status, publication date, changes, file references, open items, and review notes. Git history preserves versions, so records do not duplicate all assets.
+
+The same record also holds numbered submission attempts and sourced events. Preserve these when a review returns for fixes or a later publication replaces `current/`. Keep the referenced commits reachable in retained application history; a hash written in Markdown alone does not retain a Git object.
 
 `Submission ID` identifies this repository record. A store-issued ID, if known, belongs in `Store submission ID`; never copy the local ID into that field as if it came from the store. The date in the filename is not evidence of actual submission.
 
@@ -186,6 +190,7 @@ Listing status:
 # {{PRODUCT_NAME}} Microsoft Store Submission — {{SUBMISSION_ID}}
 
 Submission ID:
+Draft created date:
 Submission date:
 Released application version:
 Application version:
@@ -196,10 +201,15 @@ Store submission ID:
 Locales:
 Status:
 Publication date:
+Publication confirmed date:
 
 ## Changes
 
 ## Submitted files
+
+## Submission attempts
+
+## Events
 
 ## Open items
 
@@ -216,13 +226,64 @@ Field rules for a new or resumed preparation:
 - `New package version` and `Package evidence`: `Not applicable` for `listing-only`; actual package version and application-project evidence references for `package-update`, or `Pending — <reason>` during incomplete preparation. These fields concern the new package, not whether the already published app has a package.
 - Package evidence identifies the relevant artifact/build/QA sources without copying binaries, credentials, or signing material here. Product version, package version, toolkit release, and this rulebook's template version are distinct values.
 - `Store submission ID`: the actual external ID when known; otherwise `Pending — not reported by the store`. Lack of an external ID alone does not prevent preparation or readiness.
-- `Submission date`: actual submission date only when known; leave empty while preparing or if unknown. Leave `Publication date` empty until publication is confirmed; more detailed historical/time evidence is separate from this task-type change.
+- `Draft created date`: known date this local record was created, derived from its draft-created event. Do not use it as a store date or as proof of when an orphan candidate was originally prepared.
+- `Submission date`: known occurrence date of the latest actual submitted attempt; leave empty before submission or if that attempt's date is unknown. Earlier dates remain in Events.
+- `Publication date`: evidenced platform publication date only. `Publication confirmed date`: date explicit user go-live confirmation was received. Published status with an empty platform date is valid when only confirmation is known.
 - `Submitted files`: label paths as candidate files while Draft; list their intended roles and planned additions/removals. A path is not proof that it was uploaded, reviewed, or approved.
 - `Open items`: list missing facts, incomplete candidate files, checks, and user decisions with the affected action. Use `None` only when no open items remain.
 
 Do not carry literal `{{...}}` tokens into an actual submission or listing. Use the allowed pending values for unknown facts and `Not applicable` only when the task type makes a field inapplicable. A package-update cannot pass readiness with pending target version or package evidence; a listing-only update is not blocked by absent new-package fields marked not applicable.
 
 Older records may use free-text labels such as `new version` or `listing refresh` and omit the new fields. Preserve historical records. When resuming an old preparation, establish its actual type from confirmed intent/evidence, retain the old label in Review notes if changing it, and add only known facts or explicit gaps. Never infer a new package from the old label alone. See `examples/update-tasks.md` in the package root for fictional examples.
+
+### Submission attempt format
+
+Under `Submission attempts`, add an entry only for an approved snapshot or a reported actual submission whose snapshot is still pending. Use increasing local attempt numbers. A prepared entry alone does not prove upload/submission. For an ordinary incomplete Draft this section can say `None — not frozen or submitted`.
+
+```text
+### Attempt 1
+Snapshot commit:
+Snapshot paths:
+-
+Approval source:
+Snapshot verification:
+Verified at:
+```
+
+- `Snapshot commit`: the full commit object ID resolved from the application's Git repository; otherwise `Pending — <reason>`. Do not fix its length to one Git hash algorithm. Store the resolved ID rather than HEAD, a branch/tag name, or an abbreviation.
+- `Snapshot paths`: literal, forward-slash, repository-root-relative paths at that commit covering complete affected candidate trees. They must not escape that repository. For pending/unlocated historical assets, state the gap instead of inventing paths. Current working paths are useful navigation only.
+- `Approval source`: reference the actual approval and its scope; use `Pending — <reason>` when evidence of earlier approval is unavailable. Do not manufacture an approval to document an already reported store action.
+- `Snapshot verification`: `Verified` or `Pending — <reason>`, covering commit/path/content availability and the match to approved content. `Verified at` is the actual verification time, or `Unknown` if not verified. A historical verification is not a promise that objects will remain available forever; reverify on use.
+- A snapshot covers the recorded repository assets, not an external package artifact merely referenced by filename. Keep package/build/hash evidence separate and truthful.
+- Do not replace a submitted attempt's snapshot when fixing assets. Add the next attempt; retain earlier entries. Corrections must preserve the prior value and evidence of what changed.
+
+### Event format and time semantics
+
+Under `Events`, use increasing event IDs. Add a draft-created event when creating a new record; do not prefill events for actions that have not happened.
+
+```text
+### Event 1
+Event: draft-created
+Attempt: Not applicable
+Occurred at:
+Occurred timezone:
+Observed at:
+Recorded at:
+Source:
+Notes:
+```
+
+- `Event`: `draft-created`, `submitted`, `status-observed`, `draft-reopened`, `platform-published`, `go-live-confirmed`, `promoted`, or `correction`. `draft-reopened` records the local return to Draft for confirmed review fixes, with its authorization/source; it is not a store verdict. Record observed status and any external ID in Notes where relevant; do not invent intermediate events.
+- `Attempt`: the relevant local attempt number; `Not applicable` for record-level events; `Unknown` only when the association itself is not established and is listed as an open item.
+- `Occurred at`: when the action actually happened, as supported by the source. Use an ISO 8601 timestamp with explicit UTC offset, a date-only `YYYY-MM-DD` if that is the known precision, or `Unknown`.
+- `Occurred timezone`: timezone/UTC offset for a date-only occurrence when known, or `Unknown`; full timestamps already carry their offset. Never turn a known date into midnight or assume a source's timezone.
+- `Observed at`: when the event information was received/observed. `Recorded at`: when this entry was written. Preserve their different meanings, known precision, and offsets; allow `Unknown` for unavailable earlier observations. Current recording time is known, not evidence of an unknown occurrence time.
+- `Source`: a verifiable file/report reference or a concise dated user-report/approval reference. State when this is user-reported rather than independently observed. Do not copy private conversation or credentials into records.
+- `Notes`: reported status/scope, precision or evidence limitations, and correction references as applicable. A correction identifies its earlier entry, old/new values, and reason; retain the original evidence.
+
+Summary dates derive from these events, in the timezone of the evidenced date; observation/recording dates never fill unknown platform/submission occurrence dates. `go-live-confirmed` records receipt of explicit user confirmation, not an inferred earlier publication time. A later correction can clarify a summary without rewriting the earlier evidence.
+
+For legacy records, do not silently reinterpret `Submission date` or `Publication date`: the latter may previously have meant user confirmation. Preserve the old value and explain its known/unknown meaning in Review notes, then add evidence/correction events as facts become available. Missing history stays an open item; a convenient current snapshot must not be labeled as the past submitted assets. See `examples/submission-history.md` in the package root.
 
 ## 7. Content accuracy rules
 
@@ -270,6 +331,8 @@ A release preparation is ready only when:
 - [ ] No sensitive information included.
 - [ ] Store-specific requirements checked.
 - [ ] User has reviewed the final package.
+- [ ] Before submission handoff, the approved complete candidate is bound to a verified full commit/path snapshot in its attempt; preparation alone is not an actual submitted event.
+- [ ] Event sources and time meanings are explicit; unknown external times and unsupported legacy interpretations remain unknown. A source field alone does not prove external publication.
 
 ---
 

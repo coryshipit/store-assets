@@ -33,7 +33,8 @@ store-assets/
 ├── templates/                     # document template sources
 │   └── store-rulebook.md.template
 ├── examples/
-│   └── update-tasks.md            # fictional task examples
+│   ├── update-tasks.md            # fictional task examples
+│   └── submission-history.md      # snapshot and time examples
 ├── microsoft-store/
 │   ├── current/
 │   ├── release-prep/

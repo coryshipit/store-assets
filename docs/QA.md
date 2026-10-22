@@ -26,6 +26,8 @@ The iteration adopts the following limited adjustment after reviewing the `testi
 
 Reusable facts, prompts, input states, and expected invariants belong under `tests/fixtures/`. They contain no real application data. Their execution copies and per-run logs remain outside the repository. [Update-task scenarios](../tests/fixtures/update-tasks/README.md) cover I.1.
 
+[Submission-history scenarios](../tests/fixtures/submission-history/README.md) cover I.2. Their PowerShell artifact exercise uses local disposable Git repositories to verify snapshot retrieval, resubmissions, promotion/removals, dirty or missing content, and time/source recording. Its constructed artifacts demonstrate the reference contract; they are not a fresh-agent behavior PASS or the I.3 application validator.
+
 For each evidence item use `PASS`, `FAIL`, or `INCONCLUSIVE`. Record a scenario that was not attempted as `not run`, with the reason; do not call it PASS or INCONCLUSIVE. Silence, timeout, or a tool failure is INCONCLUSIVE only when the available artifacts cannot decide the result. Retry an inconclusive scenario at most once, then report the evidence and limitation without assuming a harness or product cause.
 
 For development review, report passed checks and remaining behavioral coverage separately. Before release, any omitted applicable behavioral scenario or unresolved inconclusive result requires an explicit maintainer decision recorded in the release/task notes. This iteration is not a release exception.
@@ -54,6 +56,8 @@ Static, per-file checks. Do not modify any file to pass a check — fix the kit,
 - [ ] **Relative links resolve**: every path referenced from a kit document exists (workflow → templates, DISTRIBUTION → kit, README → docs).
 - [ ] **No sensitive content**: no secrets, keys, account data, or unredacted screenshots anywhere in the kit.
 - [ ] **Terminology consistent**: lifecycle terms (current / release-prep / submissions / publish) match across the static `README.md`, `store-assets-workflow.md`, and the rulebook template.
+- [ ] **Historical references**: attempt examples use complete candidate scope and distinguish working paths from immutable Git references. No new requirement assumes the referencing record is already inside its assets commit.
+- [ ] **Time semantics**: actual submission/platform dates, go-live receipt dates, and event observation/recording times are distinct. Published status is compatible with an unknown platform date; legacy dates are not silently reinterpreted.
 
 ## Dry-run behavior check
 
@@ -86,7 +90,7 @@ Staged runs execute the workflow as four separate tasks, each with a fresh agent
 1. **Initialize** — agent reads the workflow, creates the standard structure for the confirmed values (product name, `microsoft-store`, default locale), generates `<PRODUCT_NAME>-store-assets.md` (the rulebook), and stops. Reviewer verifies the rulebook before continuing.
 2. **Prepare and record** — agent creates `release-prep/<locale>/` as a complete candidate snapshot, fills listing/release-notes for one locale, creates `submissions/<submission-id>.md` with `status: Draft`, and never edits `current/`. Reviewer verifies both the prepared files and record.
 3. **Track submission** — agent updates the existing record after an explicitly supplied store event, for example `Submitted` or `In certification`. Reviewer verifies the status transition and confirms no second active submission was created.
-4. **Publish** — only because the session is explicitly told the app is live: agent replaces `current/<locale>/` with the approved `release-prep/<locale>/` tree, sets `Published` + publication date, and removes the completed preparation. Reviewer verifies the promotion.
+4. **Publish** — only because the session is explicitly told the identified attempt is live: agent records Published and the sourced confirmation date, verifies the frozen snapshot, replaces `current/<locale>/` with that approved tree, records local promotion, and removes only the completed preparation. Platform publication date stays empty unless independently supported by the supplied evidence. Reviewer verifies the promotion and history references.
 
 Each phase's task prompt must:
 - scope the session to exactly one phase ("do only this phase, do not touch other files"),

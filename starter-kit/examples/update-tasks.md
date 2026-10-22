@@ -14,6 +14,7 @@ Example record path: `microsoft-store/submissions/2026-10-22-logo-refresh.md`.
 # Northstar Notes Microsoft Store Submission — 2026-10-22-logo-refresh
 
 Submission ID: 2026-10-22-logo-refresh
+Draft created date: 2026-10-22
 Submission date:
 Released application version: 1.0.0
 Application version: 1.0.0
@@ -24,6 +25,7 @@ Store submission ID: Pending — not reported by the store
 Locales: en-US
 Status: Draft
 Publication date:
+Publication confirmed date:
 
 ## Changes
 
@@ -51,6 +53,8 @@ Not submitted.
 - No new package is part of this task.
 - current/en-US/ remains unchanged. Do not report this candidate as ready or live.
 ```
+
+For brevity this task-type example omits the event/attempt sections now required by the rulebook. In an actual record, add the sourced draft-created event, leave Submission attempts explicitly unfrozen until approval, and add a verified snapshot before submission handoff. See [submission history](submission-history.md) for those formats.
 
 The missing external submission ID does not prevent preparing this Draft. The unreviewed Logo does prevent claiming readiness. A later real submission follows the existing status workflow; a new local record is not evidence of store submission.
 
@@ -88,4 +92,4 @@ If a Draft already owns the candidate and the task explicitly continues it, upda
 
 ## Existing projects
 
-These rules use template version `1.2.0`; that is not a toolkit release number. Compare the workflow/template changes with your generated rulebook and merge deliberately. Preserve local adaptations, current assets, candidates, and historical records. Do not regenerate a customized rulebook or relabel old records blindly. When resuming a legacy Draft, establish its type from actual task evidence, preserve any changed legacy label in Review notes, and add known fields or explicit gaps.
+These rules use template version `1.3.0`; that is not a toolkit release number. Compare the workflow/template changes with your generated rulebook and merge deliberately. Preserve local adaptations, current assets, candidates, and historical records. Do not regenerate a customized rulebook or relabel old records blindly. When resuming a legacy Draft, establish its type from actual task evidence, preserve any changed legacy label in Review notes, and add known fields or explicit gaps. Preserve ambiguous legacy dates with an interpretation note rather than silently treating them as platform timestamps.

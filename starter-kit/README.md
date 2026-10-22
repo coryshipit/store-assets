@@ -15,6 +15,8 @@ For an initialized project, ask to prepare either a **listing-only update** (cop
 
 If candidate files already exist without their own record, ask the agent to inspect and recover their association before starting another update. See [update examples](examples/update-tasks.md) for field values and recovery cases.
 
+Before actual submission, bind the approved complete candidate to a verified Git commit and its repository-relative paths. Keep each attempt's reference after promotion or review fixes. Record store event times separately from when you learned or wrote them down: "it is live now" confirms publication, but does not establish the platform's publication timestamp. See [submission history examples](examples/submission-history.md).
+
 ## How the kit is organized
 
 ```text
@@ -25,7 +27,8 @@ store-assets/
 ├── templates/
 │   └── store-rulebook.md.template # rule source; generates the rulebook
 ├── examples/
-│   └── update-tasks.md            # fictional task examples, not application data
+│   ├── update-tasks.md            # fictional task examples, not application data
+│   └── submission-history.md      # durable snapshots and event/date meanings
 ├── microsoft-store/
 │   ├── current/                  # live, published assets (per locale)
 │   ├── release-prep/             # draft assets (per locale)

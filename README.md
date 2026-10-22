@@ -17,6 +17,8 @@ To use Store Assets in your own app project:
 
 For an existing listing, preparation supports **listing-only updates** (including screenshots or Logos, keeping the published application version) and **package updates** (with or without listing changes). Both require a candidate snapshot and their own Draft record. See the kit's [update examples](starter-kit/examples/update-tasks.md).
 
+Submission records retain each attempt's Git snapshot and sourced event times, so later changes to live assets do not erase the historical reference. See [submission history examples](starter-kit/examples/submission-history.md).
+
 `starter-kit/` is the copyable work package for users; the root `AGENTS.md` governs development of Store Assets itself and should not be copied into user projects.
 
 ## 🗂️ Documentation

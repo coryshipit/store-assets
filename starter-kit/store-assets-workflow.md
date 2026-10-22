@@ -82,7 +82,7 @@ Examples: `My App` → `my-app-store-assets.md`; `MyApp` → `myapp-store-assets
 | Placeholder | Meaning |
 |---|---|
 | `{{SUBMISSION_ID}}` | repository record ID: `YYYY-MM-DD-task-name`, e.g. `2026-08-04-listing-refresh`; not a store-issued ID or proof of submission date |
-| `{{SUBMISSION_DATE}}` | actual submission date in `YYYY-MM-DD` when known; leave empty before submission or when unknown |
+| `{{SUBMISSION_DATE}}` | date of the latest actual submission attempt when known from its event; leave empty before submission or when that attempt's occurrence date is unknown |
 | `{{UPDATE_TYPE}}` | `listing-only` or `package-update`; see §2.1 |
 | `{{RELEASED_APPLICATION_VERSION}}` | currently published application version confirmed for this task; initialization facts may be stale |
 | `{{APPLICATION_VERSION}}` | version this candidate describes: the released version for `listing-only`, the confirmed target version (or `Pending — <reason>`) for `package-update` |
@@ -92,7 +92,9 @@ Examples: `My App` → `my-app-store-assets.md`; `MyApp` → `myapp-store-assets
 | `{{LOCALES}}` | locales covered by the submission |
 | `{{LOCALE}}` | locale of the file being generated |
 | `{{STATUS}}` | current status (see the status machine below) |
-| `{{PUBLICATION_DATE}}` | stays empty until publication is confirmed |
+| `{{DRAFT_CREATED_DATE}}` | date this repository Draft was created, when known; not a store event |
+| `{{PUBLICATION_DATE}}` | platform publication date only when evidenced; may stay empty even when status is `Published` |
+| `{{PUBLICATION_CONFIRMED_DATE}}` | date explicit user go-live confirmation was received; separate from the platform publication date |
 
 Submission version values describe that submission only; they do not rewrite initialization facts or historical records. A pending value is a known gap, not a `{{...}}` token. If task identity, type, released version, or scope cannot be established, ask before writing candidate content or a new record; read-only investigation may continue. Other missing facts block only dependent work and readiness. Never use `Not applicable` to hide missing package-update evidence.
 
@@ -114,6 +116,16 @@ Package evidence should locate the actual artifact and applicable application-pr
 A listing-only update preserves unrelated listing fields and application release notes. Do not invent a new application release or add Logo changes to application release notes merely to fill a skeleton. Record asset changes in the submission record. Review and official submission still apply even when there is no new package.
 
 Microsoft basis: [Publish update to your MSIX app on the Store](https://learn.microsoft.com/en-us/windows/apps/publish/publish-your-app/msix/publish-update-to-your-app-on-store), checked 2026-10-22: metadata-only updates do not require a new package and still undergo certification. This source does not define Store Assets' internal labels, package evidence fields, or Logo specifications.
+
+### 2.2 Historical evidence and time
+
+The submission record is the source for its attempts and event history (rulebook §6). Keep that history in the same record; do not create a second status ledger.
+
+- A **submission attempt** binds approved assets to a full Git commit object ID and repository-root-relative paths. An entry may be prepared before actual submission; only a sourced `submitted` event records a reported store submission. Attempt numbers are local identifiers, not store-issued IDs or counts of completed uploads.
+- An **event** distinguishes occurrence time, observation time, and time written to the record, with a source. Missing external times remain `Unknown`. A filename date, filesystem timestamp, or Git commit time is not evidence of a store event.
+- Record an explicit user report that the app is live as `go-live-confirmed`. This permits the existing Published/promotion flow, but does not supply a platform publication timestamp. Add a separate `platform-published` event only when that timestamp/date is supported.
+- Date summaries at the top of the record derive from the corresponding events. `Publication date` can remain empty while `Publication confirmed date` is known. A `promoted` event records the local archive operation, not the platform's publication time.
+- Preserve earlier attempts/events when adding later facts. Corrections identify the earlier entry, old/new values, reason, and source; never silently replace submitted asset history. Legacy records retain their original date values with an explicit interpretation note until evidence supports a correction.
 
 ### Template version
 
@@ -176,9 +188,10 @@ The agent must not edit `current/`. Each store adapter permits only one active s
 - **No active record and no leftover candidate:** begin a new update with the established identity/type/version/scope.
 - **An existing active record:** if the task explicitly continues that submission, use the same record and candidate. Edit a Draft, or reopen fixes under §4.3; do not modify submitted/in-certification assets while merely tracking status. A different update must wait for the existing submission to be resolved or withdrawn; do not auto-withdraw it or create another record.
 - **Multiple active records, conflicting scopes, or uncertain ownership:** report the conflict and preserve files; do not start or attach a candidate to a guessed record.
+- **A Published record with uncompleted promotion:** finish or resolve that archive operation under §4.4 before starting another preparation. Keep Published; do not reopen it as Draft or repurpose its remaining candidate for a different update.
 - **Candidate content without a matching active record:** use the recovery steps below. Historical `Rejected`/`Withdrawn` records do not authorize overwriting their remaining candidate content.
 
-1. Create the independent `submissions/<submission-id>.md` record with `Draft`, task variables, affected locales, intended changes, candidate paths, and known open items. Do not overwrite an existing record ID. Candidate preparation and this record form one deliverable.
+1. Create the independent `submissions/<submission-id>.md` record with `Draft`, task variables, affected locales, intended changes, candidate paths, and known open items. Add a sourced `draft-created` event for this local operation and its known creation date. Do not overwrite an existing record ID or invent earlier candidate/store event times. Candidate preparation and this record form one deliverable.
 2. Create `release-prep/<locale>/` for each affected locale as a complete future snapshot, copying `current/<locale>/` first when it exists. Preserve unchanged assets and release notes; document intended additions and removals. Do not replace an existing candidate to resume it.
 3. Update only the files inside the preparation, applying §2.1. Keep the record's scope, file references, and open items aligned with the candidate. If work stops early, retain the Draft and describe missing/incomplete files; do not call an incomplete candidate ready.
 4. Before handoff, check both the candidate and its record using the rulebook checklist. Report the ID, update type, version applicability, changed paths, preserved `current/`, and any readiness gaps. A new candidate without its independent Draft is incomplete, even if its images are ready.
@@ -193,19 +206,36 @@ The agent must not edit `current/`. Each store adapter permits only one active s
 
 ## 4.3 Submit and track
 
-1. Present the validated draft to the user.
-2. After the user submits through the official tooling, set the status to `Submitted`.
-3. When the store reports progress, update to `In certification`, `Action required`, or `Rejected` as appropriate.
-4. On `Action required` or `Rejected`, fix the draft in `release-prep/` and reopen as `Draft`.
+### Freeze approved assets before submission
+
+1. Present the candidate and known gaps for review. After its content is approved, identify the complete affected candidate trees and approved additions/removals. Freeze the actual approved content, not an earlier convenient revision.
+2. Use the application's Git repository and its normal commit rules to commit those assets, or identify an existing commit that contains exactly that content. Stage only the intended scope; do not commit unrelated user work, initialize a repository, or push merely to obtain a snapshot. If a commit cannot be made, keep preparing independently and report the snapshot as pending.
+3. Resolve that revision to its full commit object ID. Record every snapshot path relative to the application Git root, for example `store-assets/microsoft-store/release-prep/en-US`. Use literal paths, not absolute local paths, `..`, a moving branch/tag name, `HEAD`, or an abbreviated ID as the durable reference. Include all affected locales and supported shared assets; a snapshot of one changed image alone does not capture the complete candidate.
+4. Verify that the commit and path contents exist, all intended files are stored, and the candidate being handed off matches that committed content. Check staged/unstaged changes and untracked/ignored files within the scope; a commit ID alone does not capture them. Resolve any LFS/submodule/external asset content separately, or report that limitation as pending. Git text normalization is distinct from the upload bytes of a binary asset.
+5. Add an attempt entry with the snapshot reference, approval source, and verification result/time. The assets commit can precede the record update and need not contain that record; never require a future self-referencing commit ID. Keep each referenced revision reachable in retained project history, and preserve it when squashing, rebasing, or pruning history. Recheck availability whenever the snapshot is used.
+
+An unfinished Draft has no need for a frozen attempt yet. Before presenting a new submission as ready, the approved snapshot must be verified and the other checklist items satisfied. Approval/snapshot preparation alone does not change status to Submitted.
+
+For a normal checkout, read-only verification can use `git rev-parse --verify --end-of-options "<revision>^{commit}"`, inspection of stored path contents, `git --literal-pathspecs diff --exit-code <full-commit-id> -- <path>`, and `git --literal-pathspecs status --porcelain=v1 --untracked-files=all --ignored -- <path>`, run from the repository root with arguments quoted for the shell. Review every result; an empty diff is insufficient if intended files are untracked, ignored, or unavailable. These are manual checks, not an implemented Store Assets validator. Command basis, checked 2026-10-23: [rev-parse](https://git-scm.com/docs/git-rev-parse), [diff](https://git-scm.com/docs/git-diff), [status](https://git-scm.com/docs/git-status).
+
+### Record external events and resubmissions
+
+1. After the user reports actual submission through official tooling, add a sourced `submitted` event tied to the exact approved attempt and set `Submitted`. Update `Submission date` only from the event's known occurrence date. If the user reports submission later without its actual time/date, occurrence stays Unknown while observation/recording times are recorded.
+2. Record store progress as `status-observed` events and update `In certification`, `Action required`, or `Rejected` from the supplied evidence. Do not infer intermediate states or precise times that were not reported.
+3. On confirmed review fixes, reopen the same record as `Draft`, add a sourced local `draft-reopened` event, and edit the candidate. Preserve the earlier submitted attempt and its assets reference. New approved content gets a new numbered attempt and snapshot; a later actual submission gets another `submitted` event. Even if content is unchanged, a new reported submission gets a distinct attempt/event (the same commit may be reused if verified).
+4. If the store action already happened but its snapshot cannot be established, record the true reported status/event and a pending snapshot gap. Never fabricate an old commit, bind unrelated current content to an earlier attempt, or refuse to record an external fact just because local evidence is incomplete. Backfill only from evidence of what was actually submitted, with the later recording time explicit.
+
+If Git is unavailable, the directory is outside Git, or a shallow/partial checkout lacks required objects, preserve the supplied reference and mark verification pending with the cause. Do not substitute today's HEAD or initialize/fetch/rewrite history silently. A shallow checkout is acceptable when the required commit and all asset contents are actually available.
 
 ## 4.4 Promote published assets
 
 Only after the user explicitly confirms the app is live:
 
-1. Replace each affected `current/<locale>/` tree with the approved `release-prep/<locale>/` tree, so removed files do not remain as live assets.
-2. Record `status: Published` and the publication date in the submission record.
-3. Remove the completed `release-prep/` content after promotion. Git history preserves the prior live state.
-4. Confirm the repository assets match the live store page.
+1. Record the sourced `go-live-confirmed` event, its receipt date as `Publication confirmed date`, and `Published`. Leave `Publication date` empty unless the platform occurrence date is separately evidenced. Associate confirmation with the correct attempt; if that association is uncertain, record the gap without guessing.
+2. Reverify that attempt's immutable snapshot. Confirm the complete approved `release-prep/<locale>/` content still matches it, or deliberately recover the exact stored snapshot into an isolated staging directory for inspection. Never promote later edits or an unavailable snapshot on the strength of a moving `current/` link.
+3. Replace each affected `current/<locale>/` tree with that complete approved snapshot, so removed files do not remain as live assets. Keep the attempt's original commit/path references unchanged even though those paths may no longer exist in today's working tree.
+4. After verifying the replacement, add a local `promoted` event identifying the attempt and remove only the completed preparation. If verification or replacement cannot finish, keep the known Published status, candidate files, and an explicit uncompleted-promotion item; do not add a promoted event or delete the candidate. A later task can finish this archive operation without reopening the submission as Draft.
+5. Report which assets are archived and whether the live store page was actually observed. User confirmation permits promotion; it does not prove an independent live-page comparison. Preserve any unverified page result.
 
 The agent must not set `Published` or update `current/` without that explicit confirmation.
 

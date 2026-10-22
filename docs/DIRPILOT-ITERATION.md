@@ -4,7 +4,7 @@ Date: 2026-10-22
 
 Branch: `iteration/dirpilot-feedback`
 
-Status: plan accepted on 2026-10-22; I.1 rules/examples implemented, independent behavior verification pending
+Status: plan accepted on 2026-10-22; I.1/I.2 rules/examples implemented, independent behavior verification pending
 
 ## 1. Purpose and evidence
 
@@ -12,7 +12,7 @@ Improve the existing Microsoft Store update workflow using the DirPilot usage re
 
 The review reports that separating live and candidate assets, recording submissions, and waiting for explicit go-live confirmation were useful. It also reports an actual omission: a Logo update candidate was created without its own Draft record. Other gaps concern version applicability, asset roles, historical references, dates, local adaptations, and session handoff. The underlying DirPilot repository has not been independently audited for this iteration.
 
-The maintainer accepted the staged plan on 2026-10-22 and authorized starting I.1. This does not approve every suggestion or finalize later schemas. Work proceeds one stage at a time, with a concrete change and verification result reviewed before the next stage.
+The maintainer accepted the staged plan on 2026-10-22, authorized I.1, then authorized I.2 after I.1 was committed and pushed. This does not approve every suggestion or finalize later schemas. Work proceeds one stage at a time, with a concrete change and verification result reviewed before the next stage.
 
 ## 2. Scope and boundaries
 
@@ -179,8 +179,8 @@ For each stage, review the spec/template diff, applicable checks, remaining unce
 | Decision | Recommended starting position | Settle before |
 | --- | --- | --- |
 | First submission | Retain updates-only scope; consider separately | Any scope expansion |
-| Record format and legacy fields | Extend the current readable record minimally; document compatibility | I.1/I.2 acceptance and checker implementation |
-| Snapshot timing and resubmission references | Commit approved asset content before referencing it; preserve each submitted attempt | I.2 acceptance |
+| Record format and legacy fields | Implemented in template 1.3.0: readable attempt/event sections, distinct date meanings, explicit pending/unknown values and legacy interpretation notes | Review before I.3 parsing is finalized |
+| Snapshot timing and resubmission references | Implemented in I.2: approved full candidate commit precedes its record reference; retain every attempt, reverify before promotion, expose unavailable history | Independent behavior verification pending |
 | Checker runtime and format | One optional Python 3 standard-library script with explicit input and no writes | I.3 implementation |
 | Asset inventory location and shared assets | Decide from verified Microsoft roles; preserve screenshot conventions | I.4 implementation |
 | Provenance storage | One compact origin/adaptation record; unknown is allowed | I.5 implementation |
