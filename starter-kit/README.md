@@ -11,6 +11,10 @@ It is not a store backend, GUI, ASO platform, or auto-upload service. It standar
 3. Store Assets currently manages updates to an existing Microsoft Store listing. For a new application that has not yet been published, keep the work package in the project but complete the first store submission outside this workflow.
 4. After a Microsoft Store version is live, the agent reads the rule template, confirms project facts (product name, default locale, current app version), and generates the rulebook `<PRODUCT_NAME>-store-assets.md`. Every later task then starts from the rulebook.
 
+For an initialized project, ask to prepare either a **listing-only update** (copy, screenshots, or Logos without a new package) or a **package update** (also used when a new package and listing changes ship together). A listing-only update keeps the confirmed published application version; no new package version is needed. Both tasks produce a complete candidate and an independent Draft record. Missing package evidence for a package update is recorded as pending and blocks readiness, rather than being invented.
+
+If candidate files already exist without their own record, ask the agent to inspect and recover their association before starting another update. See [update examples](examples/update-tasks.md) for field values and recovery cases.
+
 ## How the kit is organized
 
 ```text
@@ -20,6 +24,8 @@ store-assets/
 ├── <PRODUCT_NAME>-store-assets.md  # generated rulebook — this project's rules
 ├── templates/
 │   └── store-rulebook.md.template # rule source; generates the rulebook
+├── examples/
+│   └── update-tasks.md            # fictional task examples, not application data
 ├── microsoft-store/
 │   ├── current/                  # live, published assets (per locale)
 │   ├── release-prep/             # draft assets (per locale)
@@ -29,7 +35,7 @@ store-assets/
 └── google-play/                  # reserved skeleton (future adapter)
 ```
 
-The kit ships exactly this `README.md` plus the workflow, the templates, and the store folders. It ships no other developer files (`AGENTS.md`, `docs/`). The rulebook is created by the first run; until then the workflow and the template are the only documents to read.
+The kit ships this static `README.md`, the workflow, templates, fictional examples, and store folders. It ships no repository development files (`AGENTS.md`, `docs/`, or `tests/`). The rulebook is created by the first run; until then the workflow and template supply the executable process and rules. Examples illustrate those rules and are never copied into a live submission as facts.
 
 ## Workflow vs rulebook
 

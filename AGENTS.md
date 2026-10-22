@@ -76,6 +76,18 @@ When developing tooling, also consider:
 - whether an agent in a fresh session can continue from repository files alone
 - whether there are Microsoft Store examples or fixtures to verify behavior
 
+### Usage-feedback iteration branches
+
+For each iteration driven by real usage feedback, create a dedicated branch from `main` using:
+
+```text
+iteration/<case-name>-feedback
+```
+
+- Use the application or usage case name in lowercase kebab-case, for example `iteration/dirpilot-feedback`.
+- For another iteration on the same case, append the date: `iteration/dirpilot-feedback-2026-10-22` (`YYYY-MM-DD`).
+- Group the selected improvements and their verification on this branch for review before merging into `main`. The branch identifies the feedback source; it does not imply acceptance of every suggestion in that feedback.
+
 ## 5. Stable product boundary
 
 Store Assets' core is:

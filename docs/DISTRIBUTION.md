@@ -32,6 +32,8 @@ store-assets/
 ├── store-assets-workflow.md       # process spec
 ├── templates/                     # document template sources
 │   └── store-rulebook.md.template
+├── examples/
+│   └── update-tasks.md            # fictional task examples
 ├── microsoft-store/
 │   ├── current/
 │   ├── release-prep/

@@ -80,6 +80,8 @@ store-assets/
 ├── <PRODUCT_NAME>-store-assets.md    # Generated rules doc (from templates/store-rulebook.md.template)
 ├── templates/                        # Package-level template sources
 │   └── store-rulebook.md.template    # Placeholder source; resolved into the per-product rules doc
+├── examples/                         # Fictional user-facing task examples (added in Task I.1)
+│   └── update-tasks.md
 ├── apple-app-store/                  # Reserved skeleton (future phase; no rules assumed)
 ├── google-play/                      # Reserved skeleton (future phase; no rules assumed)
 └── microsoft-store/
@@ -151,8 +153,24 @@ update the submission record (status = Published)
 | D | Add tool recommendations to the root README | pending | recommend complementary ecosystem tools so users pick what fits their target store |
 | E | Finalize the starter-kit structure under the two mechanisms | done | structure implemented in `starter-kit/` per the "Finalized starter-kit design" section |
 | F | Establish a QA procedure for the starter kit | done | `docs/QA.md` defines conformance + dry-run checks; staged dry-run mode adopted (2026-08-08) after three full-run attempts ended in headless-agent silence — judged by files, not by the agent's final message; dry-run fixture project exists but no full pass recorded yet. The v0.1.1 release exception is recorded below. |
-| G | Research and optimize the testing approach | pending | the staged dry-run is an interim method; the overall testing approach needs further research — dry-run may not be the optimal solution (recorded 2026-08-08). This research is required before treating a future dry-run result as a release gate. |
+| G | Research and optimize the testing approach | in progress | Task I.1 adopted a focused conformance/artifact/fresh-agent/release evidence distinction in `docs/QA.md` and added versioned scenario inputs. Independent behavior coverage, the broader strategy, and release-gate evaluation remain unfinished; the `testing/qa-strategy` proposal was reviewed, not merged wholesale. |
 | H | Clarify the unpacked-package user experience | proposed | first-time users may not know which folder to use after unzipping the release; improve the delivery artifact and make usage instructions explicit (2026-08-09) |
+| I | Iterate from DirPilot usage feedback | in progress | Staged plan accepted 2026-10-22; I.1 rules/examples implemented, with independent behavior verification pending. See [`DIRPILOT-ITERATION.md`](DIRPILOT-ITERATION.md). First milestone: listing-only task semantics, historical evidence, and read-only omission checks. |
+
+### Task I stages
+
+Detailed changes, dependencies, compatibility work, and acceptance criteria live in [`DIRPILOT-ITERATION.md`](DIRPILOT-ITERATION.md). The staged plan is accepted; later proposed formats and scope decisions are not yet implemented rules.
+
+| Stage | Priority | Outcome | Status |
+| --- | --- | --- | --- |
+| I.1 | P0 | Prepare a listing/asset-only update with correct version applicability and its own Draft | implemented; independent behavior verification pending |
+| I.2 | P0 | Preserve submitted asset references and distinguish event dates from confirmation dates | planned |
+| I.3 | P0 | Detect orphan candidates and structural record errors with a read-only check | planned |
+| I.4 | P1 | Map Logo and other supported assets to verified store upload roles and sources | planned |
+| I.5 | P1 | Record upstream/local provenance and preserve adaptations during manual upgrades | planned |
+| I.6 | P1 | Make new-session startup, handoff, and focused QA reproducible from project files | planned |
+
+I.1 review evidence (2026-10-23): template `1.2.0` defines task/field applicability, Draft-first preparation, orphan recovery, and legacy-record handling. Standalone artifact exercises for listing-only preparation, mixed updates with missing package evidence, unknown target version, and confirmed orphan recovery passed; live asset hashes were preserved and temporary execution copies removed. Layout/token/link checks and a local archive check passed. Fresh-agent scenarios were not run: this task used the development session plus deterministic artifact construction, not an isolated agent executor. Conflict/continuation, ambiguous ownership, legacy, and first-submission scenarios are specified as reusable fixtures and reviewed against the rules, but have no independent behavior result. This is not a complete behavioral PASS or a release check.
 
 ### Release log
 
@@ -202,6 +220,8 @@ Static checks completed for the release: documentation and workflow consistency 
 
 ## Priority
 
+Current iteration (2026-10-22): work through Task I one stage at a time, in the order above. The focused QA adjustment for I.1 is recorded in `docs/QA.md`; broader Task G work remains open. First-submission support remains outside the accepted scope; Tasks D and H remain separate follow-up work.
+
 1. Keep lifecycle, naming, and terminology consistent across `README.md`, `starter-kit/`, templates, and examples.
 2. Research and decide the release-testing approach (Task G).
 3. Add the tool recommendations section to the root `README.md` (Task D).
@@ -209,6 +229,7 @@ Static checks completed for the release: documentation and workflow consistency 
 
 ## Next steps
 
+- Review I.1's implementation and its outstanding independent behavior coverage. Next is I.2's snapshot/time design; stabilize it before implementing the I.3 checker.
 - Research the testing approach (Task G): decide whether dry-run stays, is replaced, or is supplemented before using it as a release gate. The planned v0.1.1 release is an explicit exception, recorded above.
 - Clarify and accept the concrete list for Task D with verifiable sources before writing it into `README.md`.
 - Track new tasks as they are added to this doc (validation script, CLI, multi-store adapters).

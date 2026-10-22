@@ -42,11 +42,13 @@ Then identifies:
 
 - target store adapter and task type: prepare update, validate, record status, or promote published assets
 
+When preparing an update, also identify its update type (§2.1), the confirmed released application version, and its locale/change scope before writing a candidate or record. Inspect both records and existing candidate content first (§4.2).
+
 Anything that cannot be determined safely is marked as pending confirmation, not filled in.
 
 ## 2. Variable interface
 
-The agent resolves variables before generating files. Templates keep placeholder names; generated files receive resolved values. Do not do a blind repository-wide replacement; historical records and `current/` keep their values.
+The agent resolves project variables before generating the rulebook. For a submission, establish task identity, update type, confirmed released application version, and scope first; mark other unavailable facts as `Pending — <reason>` instead of inventing them. Templates keep placeholder names; generated files receive resolved values or the explicitly allowed pending/not-applicable values below. Do not do a blind repository-wide replacement; historical records and `current/` keep their values.
 
 ### Project variables (resolved once at initialization)
 
@@ -79,16 +81,39 @@ Examples: `My App` → `my-app-store-assets.md`; `MyApp` → `myapp-store-assets
 
 | Placeholder | Meaning |
 |---|---|
-| `{{SUBMISSION_ID}}` | `YYYY-MM-DD-task-name`, e.g. `2026-08-04-listing-refresh` |
-| `{{SUBMISSION_DATE}}` | date in `YYYY-MM-DD` |
-| `{{UPDATE_TYPE}}` | e.g. `new version`, `listing refresh` |
-| `{{APPLICATION_VERSION}}` | application version of this submission |
+| `{{SUBMISSION_ID}}` | repository record ID: `YYYY-MM-DD-task-name`, e.g. `2026-08-04-listing-refresh`; not a store-issued ID or proof of submission date |
+| `{{SUBMISSION_DATE}}` | actual submission date in `YYYY-MM-DD` when known; leave empty before submission or when unknown |
+| `{{UPDATE_TYPE}}` | `listing-only` or `package-update`; see §2.1 |
+| `{{RELEASED_APPLICATION_VERSION}}` | currently published application version confirmed for this task; initialization facts may be stale |
+| `{{APPLICATION_VERSION}}` | version this candidate describes: the released version for `listing-only`, the confirmed target version (or `Pending — <reason>`) for `package-update` |
+| `{{NEW_PACKAGE_VERSION}}` | exact version of the new package from application-project evidence, `Pending — <reason>`, or `Not applicable` for `listing-only` |
+| `{{PACKAGE_EVIDENCE}}` | references to application-project package/build/QA evidence, `Pending — <reason>`, or `Not applicable` for `listing-only` |
+| `{{STORE_SUBMISSION_ID}}` | external ID only if reported by the store; otherwise `Pending — not reported by the store` |
 | `{{LOCALES}}` | locales covered by the submission |
 | `{{LOCALE}}` | locale of the file being generated |
 | `{{STATUS}}` | current status (see the status machine below) |
 | `{{PUBLICATION_DATE}}` | stays empty until publication is confirmed |
 
-When a submission has its own version, it overrides the project variable for that submission. If a required value cannot be inferred, ask the user before generating files.
+Submission version values describe that submission only; they do not rewrite initialization facts or historical records. A pending value is a known gap, not a `{{...}}` token. If task identity, type, released version, or scope cannot be established, ask before writing candidate content or a new record; read-only investigation may continue. Other missing facts block only dependent work and readiness. Never use `Not applicable` to hide missing package-update evidence.
+
+### 2.1 Update types and field applicability
+
+These are Store Assets task labels, not Partner Center submission categories.
+
+| Rule | `listing-only` | `package-update` |
+|---|---|---|
+| Scope | Store copy, screenshots, Logos, or other supported listing assets; no new application package | New application package, with or without listing/asset changes (a mixed update uses this type) |
+| Released application version | Required, confirmed current version | Required, confirmed current version |
+| Candidate application version | Same as the released version; never auto-increment | Actual target version from the application project; may remain pending during preparation |
+| New package version | `Not applicable` | Exact package version from evidence; may remain pending during preparation |
+| Package evidence | `Not applicable` — no new package in this task | References identifying the candidate package and its build/QA evidence; may remain pending during preparation |
+| Independent record | Required, starts at `Draft` | Required, starts at `Draft` |
+
+Package evidence should locate the actual artifact and applicable application-project checks, for example its filename, architecture, hash, build source, and QA report. Do not copy packages, signing material, or secrets into this kit, perform engineering checks on the strength of this document alone, or equate a reference with a passed check. Product and package version strings may differ; never derive one from the other or choose a new version on the application's behalf.
+
+A listing-only update preserves unrelated listing fields and application release notes. Do not invent a new application release or add Logo changes to application release notes merely to fill a skeleton. Record asset changes in the submission record. Review and official submission still apply even when there is no new package.
+
+Microsoft basis: [Publish update to your MSIX app on the Store](https://learn.microsoft.com/en-us/windows/apps/publish/publish-your-app/msix/publish-update-to-your-app-on-store), checked 2026-10-22: metadata-only updates do not require a new package and still undergo certification. This source does not define Store Assets' internal labels, package evidence fields, or Logo specifications.
 
 ### Template version
 
@@ -146,12 +171,25 @@ Draft is the default for a new release preparation. The ready-for-submission che
 
 ## 4.2 Prepare an update
 
-The agent must not edit `current/`. Each store adapter permits only one active submission at a time. Before preparing an update, check that no submission record is in `Draft`, `Submitted`, `In certification`, or `Action required`; if one exists, stop and ask the user to resolve or withdraw it first.
+The agent must not edit `current/`. Each store adapter permits only one active submission at a time (`Draft`, `Submitted`, `In certification`, or `Action required`). Inspect all records and actual `release-prep/` content before copying or writing. Empty directories and `.gitkeep` alone are not candidate content.
 
-1. Create `release-prep/<locale>/` for each affected locale as a complete candidate snapshot of the future live state, copying `current/<locale>/` first when it exists.
-2. Update only the files inside the release preparation.
-3. Record the submission variables and status (starting at `Draft`) in the new submission record.
-4. Validate using the ready-for-submission checklist in the rulebook before presenting the draft.
+- **No active record and no leftover candidate:** begin a new update with the established identity/type/version/scope.
+- **An existing active record:** if the task explicitly continues that submission, use the same record and candidate. Edit a Draft, or reopen fixes under §4.3; do not modify submitted/in-certification assets while merely tracking status. A different update must wait for the existing submission to be resolved or withdrawn; do not auto-withdraw it or create another record.
+- **Multiple active records, conflicting scopes, or uncertain ownership:** report the conflict and preserve files; do not start or attach a candidate to a guessed record.
+- **Candidate content without a matching active record:** use the recovery steps below. Historical `Rejected`/`Withdrawn` records do not authorize overwriting their remaining candidate content.
+
+1. Create the independent `submissions/<submission-id>.md` record with `Draft`, task variables, affected locales, intended changes, candidate paths, and known open items. Do not overwrite an existing record ID. Candidate preparation and this record form one deliverable.
+2. Create `release-prep/<locale>/` for each affected locale as a complete future snapshot, copying `current/<locale>/` first when it exists. Preserve unchanged assets and release notes; document intended additions and removals. Do not replace an existing candidate to resume it.
+3. Update only the files inside the preparation, applying §2.1. Keep the record's scope, file references, and open items aligned with the candidate. If work stops early, retain the Draft and describe missing/incomplete files; do not call an incomplete candidate ready.
+4. Before handoff, check both the candidate and its record using the rulebook checklist. Report the ID, update type, version applicability, changed paths, preserved `current/`, and any readiness gaps. A new candidate without its independent Draft is incomplete, even if its images are ready.
+
+### Recover a candidate with a missing or inactive record
+
+1. Inspect the candidate, records, Git history, and confirmed project facts without changing assets. Report the missing association and any conflicts; do not infer ownership from a locale, filename, or modification time alone.
+2. If evidence and the requested task establish that it belongs to an existing submission, resume that record. Reopen a rejected submission as Draft only when preparing its confirmed fixes (§4.3). Do not reopen a withdrawn/published submission or link a new change to it merely to avoid creating a record.
+3. If the confirmed task is a separate update and no other active submission conflicts, create its independent Draft using the current agreed ID/type/released version/scope. Keep unknown historical facts unknown; the new record must not claim when earlier candidate work or a store submission occurred.
+4. If ownership or required task facts remain uncertain, ask for those facts and stop dependent edits. Keep all existing content; do not delete or recopy it from `current/` as a repair. Read-only checks and reporting can continue.
+5. Reconcile known candidate files with the recovered record, explicitly list missing or unreviewed items, then run the same handoff checks. Association alone does not prove candidate completeness or user approval.
 
 ## 4.3 Submit and track
 
@@ -185,8 +223,8 @@ When asked to initialize or perform store work, the agent:
 
 1. Reads this document, then either the rulebook (§1.2) or, on first setup, the rule template (§1.1).
 2. Inspects the application project.
-3. Determines the required variables, asking for anything that cannot be inferred.
+3. Determines task identity, type, confirmed released version, and scope; asks for missing prerequisites and records other unknowns as pending without inventing them.
 4. If initializing, generates the rulebook from `templates/store-rulebook.md.template` (§3).
 5. Creates the standard structure or updates the correct directories.
-6. Generates or updates the relevant files (from templates where applicable).
-7. Reports: created/modified/unmodified paths, gaps, unresolved placeholders, and claims needing review.
+6. Generates or updates the relevant files (from templates where applicable); preparation includes its independent Draft and a complete candidate, or an explicit incomplete-work report.
+7. Reports: record ID/update type/version applicability, created/modified/unmodified paths, gaps, unresolved placeholders, and claims needing review. No new candidate is handed off without its Draft.

@@ -6,12 +6,29 @@ It is a technical document for the repository itself. It is not user-facing usag
 
 ## What is tested
 
-The starter kit is a spec plus templates plus agent instructions, not a program. There are no unit tests. QA checks two invariants instead:
+The starter kit is a spec plus templates plus agent instructions, not a program. QA checks two invariants:
 
 1. **Conformance** — the files always obey the rules defined in the kit's templates (`templates/store-rulebook.md.template`) and the process spec (`starter-kit/store-assets-workflow.md`): structure, naming, placeholder discipline, and prohibited content.
 2. **Behavior** — a fresh agent session given only the copied kit can run the workflow on a fixture project and produce output that matches the spec.
 
-Both checks are run whenever the kit changes (a new template, a spec rule change, a rename, a doc edit). Running them is the definition of "the kit still works."
+Conformance checks are required whenever the kit changes. Select behavioral scenarios for the rules that changed; a wording or navigation edit does not require a full lifecycle run. Assess results from files and observable actions, not an agent's final claim.
+
+### Focused verification decision (2026-10-22, Task I.1)
+
+The iteration adopts the following limited adjustment after reviewing the `testing/qa-strategy` proposal. This does not complete Task G or adopt that branch wholesale.
+
+| Evidence | Use |
+| --- | --- |
+| Conformance | Required for affected files; full kit conformance for workflow/template changes |
+| Artifact exercise | Copy only the kit plus versioned fictional application inputs outside the repo; exercise the changed rules and inspect outputs. Label this separately from fresh-agent verification |
+| Fresh-agent scenario | Supplement behavioral changes with an independent session where available. Record unrun scenarios explicitly; an artifact exercise by an agent with development context is not an independent behavior PASS |
+| Release artifact | Before publishing, verify the built archive and actual downloaded asset; no local exercise substitutes for that check |
+
+Reusable facts, prompts, input states, and expected invariants belong under `tests/fixtures/`. They contain no real application data. Their execution copies and per-run logs remain outside the repository. [Update-task scenarios](../tests/fixtures/update-tasks/README.md) cover I.1.
+
+For each evidence item use `PASS`, `FAIL`, or `INCONCLUSIVE`. Record a scenario that was not attempted as `not run`, with the reason; do not call it PASS or INCONCLUSIVE. Silence, timeout, or a tool failure is INCONCLUSIVE only when the available artifacts cannot decide the result. Retry an inconclusive scenario at most once, then report the evidence and limitation without assuming a harness or product cause.
+
+For development review, report passed checks and remaining behavioral coverage separately. Before release, any omitted applicable behavioral scenario or unresolved inconclusive result requires an explicit maintainer decision recorded in the release/task notes. This iteration is not a release exception.
 
 ## Before a check
 
@@ -49,18 +66,18 @@ This is the behavioral test. A fresh agent session (no prior context) verifies t
 | **Staged run** | Run the four phases as separate fresh agent sessions, one phase per session, verifying the produced files after each phase. | **Recommended** |
 | Full run | One session executes all four phases. | Deprecated |
 
-**Why staged runs are recommended (evidence, 2026-08-08):** three full-run attempts in the current headless environment all ended with the agent session going **silent** — no error, no new file, no final report — at different points: one after completing all four phases, one after phase 1, one while awaiting a go-live confirmation that a headless session can never receive. This is a harness limitation of long, single-session agent tasks (long context, interactive confirmations), not a kit defect. The produced files themselves were correct in the runs that had reached completion. Staging keeps each task short, makes any failure attributable to one phase, and lets the reviewer rely on **files, not on the agent's final message**.
+**Why staged runs are recommended (evidence, 2026-08-08):** three full-run attempts ended with the agent session going silent at different points: one after completing all four phases, one after phase 1, one while awaiting a go-live confirmation. Long sessions and unavailable interaction are possible harness causes; silence alone does not establish the cause or the kit's correctness. Staging keeps tasks short and permits assessment from files. Prefer independent, affected scenarios when a full lifecycle is unnecessary.
 
 If a staged run is not feasible, a full run is still acceptable on the condition that the result is judged by the produced files, not by whether the session produced a final report.
 
 ### Fixture (created once, reusable)
 
-Create the fixture application project **outside the repository**, in a disposable location. It contains:
+Keep reusable fixture inputs versioned under `tests/fixtures/`. Create the fixture application execution copy **outside the repository**, in a disposable location. It contains:
 
 - a minimal `README.md` and `AGENTS.md` (any content)
 - a PRD-like fact sheet: product name, selected store adapter (`microsoft-store`), default locale, current published app version, and one or two verifiable product features
 
-The fixture is written once and reused by later runs. It holds only the inputs the workflow reads (a fake application project); it does not hold any run output.
+Fixture sources hold only declared inputs, prompts, and expected invariants, not run outputs. Every scenario starts from its specified state in a new execution copy; do not repair outputs manually and then count the agent scenario as passing.
 
 ### Run steps (staged)
 
@@ -96,7 +113,7 @@ Every run is a fresh, self-contained, disposable execution. It must never write 
 
 4. **Document the fixture** the run uses (app version, locale) in the run result.
 
-5. **Execute** the workflow as staged tasks (see "Dry-run behavior check" above), each phase a separate fresh session, entirely inside the run directory. Judge each phase by its produced files; a session that goes silent mid-task is a harness limitation — retry that phase in a fresh session rather than treating the run as failed.
+5. **Execute** the selected scenario or staged tasks entirely inside the run directory. Label artifact exercises and fresh-agent scenarios separately. Judge each by produced files; use the result and finite-retry rules above if a session goes silent.
 
 6. **Verify** the assertions (below), staying read-only on the repository.
 
@@ -119,9 +136,9 @@ After the run, a reviewer (or a follow-up check) verifies:
 
 ## When to run
 
-- After any edit to `starter-kit/` (template, workflow doc, or structure).
-- After any edit that changes kit behavior or packaging (`docs/DISTRIBUTION.md`, packaging workflow).
-- Before tagging a release.
+- Run conformance after any edit to `starter-kit/` and after changes to packaging rules/workflows.
+- Select affected scenarios after changing workflow behavior, templates, or structure. Do not require unrelated lifecycle stages for a focused task change.
+- Before tagging a release, review conformance, applicable scenario coverage, and package evidence. After building the draft asset, verify the actual download before publishing.
 
 ## Result recording
 
@@ -129,7 +146,7 @@ Each run produces a short result report, written to the relevant task or commit 
 
 - **Change under test** — what was edited and why.
 - **Fixture** — the app version and locale the fixture used.
-- **Outcome** — conformance items passed; dry-run outcome (`PASS` / `FAIL` / `PARTIAL`) and any gaps found (for example a missing instruction, an unresolved placeholder, a spec mismatch).
+- **Outcome** — conformance, artifact exercise, and fresh-agent results separately (`PASS` / `FAIL` / `INCONCLUSIVE`, or `not run`); include gaps such as missing instructions, unresolved placeholders, or spec mismatches.
 - **Cleanliness** — the residual check result: run directory created and removed, and confirmation that nothing remains outside the repository. Call it out explicitly if a leftover was found and removed.
 
 These are recorded as text in the change's commit or task; per-run logs do not belong in the repository.
