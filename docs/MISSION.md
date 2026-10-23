@@ -28,6 +28,7 @@ The user-facing package plays the role that the reference project layout drafts 
 | Optional structural checks | `checking.md` + `scripts/check-store-assets.mjs` (read-only; does not authenticate evidence or publish) |
 | Microsoft listing Logo roles and ownership | `microsoft-store/asset-rules.md` + `microsoft-store/templates/asset-inventory.json.template` (store-specific, with official sources and review date) |
 | Installed origin, local adaptations and manual upgrades | `provenance.json` + `upgrading.md` (unknown evidence retained; generated rules merged deliberately) |
+| Session startup, missing facts and handoff | `store-assets-workflow.md` §§1.3–1.4 / §5 + `examples/session-handoff.md` (saved-state evidence and existing records) |
 
 Intentional differences from the reference layout:
 

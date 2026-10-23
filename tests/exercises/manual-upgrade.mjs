@@ -55,6 +55,7 @@ function resolveBook(template) {
   return text;
 }
 const sourceBefore = signature(source);
+const sourceVersion = read(path.join(source, 'templates/store-rulebook.md.template')).match(/^template_version:\s*(.+)$/m)[1].trim();
 try {
   // Exercise the actual build code; do not maintain a parallel stamping implementation.
   const workflow = read(path.join(repo, '.github/workflows/release.yml'));
@@ -70,7 +71,7 @@ try {
   const provenancePath = path.join(staged, 'provenance.json'), releaseProvenance = JSON.parse(read(provenancePath));
   check(releaseProvenance.upstream.release === 'v9.9.9' && releaseProvenance.upstream.commit === 'a'.repeat(40), 'Stamp records independent toolkit release and full source commit');
   check(releaseProvenance.upstream.repository === 'https://github.com/fixture/store-assets', 'Stamp identifies actual source repository');
-  check(releaseProvenance.upstream.template_versions['templates/store-rulebook.md.template'] === '1.6.0' &&
+  check(releaseProvenance.upstream.template_versions['templates/store-rulebook.md.template'] === sourceVersion &&
     releaseProvenance.upstream.template_versions['microsoft-store/templates/asset-inventory.json.template'] === '1.0.0', 'Template versions remain separate');
   for (const [relative, bytes] of stagingBefore) if (relative !== 'provenance.json') check(fs.readFileSync(path.join(staged, relative)).equals(bytes), 'Stamp preserves other staged file: ' + relative);
   for (const overrides of [{ KIT_SOURCE_COMMIT: 'HEAD' }, { GITHUB_REF_NAME: 'v9.9' }, { GITHUB_REPOSITORY: '../outside' }]) {
@@ -171,9 +172,10 @@ Legacy fixture; original platform date/source remain unknown.
   book = read(bookPath);
   const newTemplate = read(path.join(incoming, 'templates/store-rulebook.md.template'));
   const provenanceRules = newTemplate.match(/^The installed `provenance\.json`[^\r\n]+/m)[0];
-  book = book.replace('## 4. Directory responsibilities', provenanceRules + '\n\n## 4. Directory responsibilities')
+  const sessionRules = newTemplate.match(/^For a fresh session[^\r\n]+/m)?.[0];
+  book = book.replace('## 4. Directory responsibilities', provenanceRules + '\n\n' + (sessionRules ? sessionRules + '\n\n' : '') + '## 4. Directory responsibilities')
     .replace(/^├── checking\.md[^\r\n]+/m, line => line + '\n├── upgrading.md                  # manual merge rules\n├── provenance.json               # installed evidence/history')
-    .replace(/^│   └── logo-assets\.md[^\r\n]+/m, line => line.replace('└──', '├──') + '\n│   └── manual-upgrade.md          # fictional adaptation example')
+    .replace(/^│   └── logo-assets\.md[^\r\n]+/m, line => line.replace('└──', '├──') + '\n│   ├── manual-upgrade.md          # fictional adaptation example\n│   └── session-handoff.md         # saved-state continuation example')
     .replace('When these rules change, this file is regenerated and the template version is bumped.', 'Initial generation evidence retained; later changes are merged deliberately under upgrading.md and recorded in provenance.json.');
   write(bookPath, book); entry.changes.push({ path: 'northstar-notes-store-assets.md', action: 'merge', reason: 'Integrate upgrade ownership/structure/footer; retain local marker, extension and original generation evidence' });
   check(read(bookPath).includes(facts.local_extension) && read(bookPath).includes('template_version: ' + facts.local_marker), 'Local extension and marker survive deliberate merge');

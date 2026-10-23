@@ -39,7 +39,8 @@ store-assets/
 │   ├── update-tasks.md            # fictional task examples
 │   ├── submission-history.md      # snapshot and time examples
 │   ├── logo-assets.md             # listing Logo sources and upload consumers
-│   └── manual-upgrade.md          # unknown origin and local adaptation example
+│   ├── manual-upgrade.md          # unknown origin and local adaptation example
+│   └── session-handoff.md         # saved-state startup and canonical field handoff
 ├── scripts/
 │   └── check-store-assets.mjs      # standalone Node.js standard-library checker
 ├── microsoft-store/
@@ -62,6 +63,7 @@ Rules for what is included and what is not:
 - Include the optional checker and its guide. No dependency install or repository-only module is needed; Node.js is supplied by the application developer. The release archive check requires these files but does not run an application's validation or upload anything to a store.
 - Include Microsoft asset rules, the JSON inventory template, and the fictional Logo example. They remain readable in an isolated download; source URLs and review dates ship with the rules. Actual product inventories and artwork are generated in the application project and are not included in this kit.
 - Include the manual-upgrade guide, provenance defaults, and customized-kit example. Installed-project adaptations/history belong to the application repository and must never be bundled into a new upstream release.
+- Include the session example with the workflow's startup, missing-fact and handoff rules. Application continuation uses existing records/Open items/Review notes; no generated handoff/status dashboard ships in the archive.
 
 ## Versioning and release artifacts
 

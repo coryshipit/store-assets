@@ -35,9 +35,9 @@ Then generates the rulebook (§3). No other store work happens before the rulebo
 
 1. This document (process).
 2. The project rulebook (`<PRODUCT_NAME>-store-assets.md`) — structure and rules.
-3. The file skeletons in the rulebook; they are the Phase 1 source for listing, release-notes, and submission-record formats.
-4. Existing files under the selected store adapter's `current/`, `release-prep/`, and `submissions/` directories that the task touches.
-5. Verifiable facts in the application project: PRD, release notes, QA results, and approved screenshots.
+3. The selected store's saved records/candidate/archive state, following the ownership inspection in §1.3.
+4. The task's applicable rulebook skeletons; they remain the Phase 1 source for listing, release-notes and submission-record formats.
+5. After scope/checks under §1.3, the task-relevant application facts: PRD, release notes, QA results and approved screenshots as needed.
 
 Read existing `provenance.json` and relevant local adaptations when rules/toolkit differences affect the task. For an upgrade task, follow [upgrading.md](upgrading.md) before replacing toolkit files or merging generated rules. An upgrade preserves all store current/candidate/history files; report separately needed migrations without applying them as part of the toolkit upgrade.
 
@@ -52,6 +52,31 @@ For Microsoft Store Logo work, read [asset-rules.md](microsoft-store/asset-rules
 Anything that cannot be determined safely is marked as pending confirmation, not filled in.
 
 For a validation task or before handing off prepared/updated records, run the optional read-only checker when its runtime is available: `node scripts/check-store-assets.mjs --root .` from the kit directory. See [checking.md](checking.md) for requirements, output, and limits. Resolve errors or list them as explicit incomplete work; review findings are not automatically resolved by a zero exit code. If the runtime/check is unavailable, report that limitation and perform the applicable rulebook checks manually, without claiming an automated PASS.
+
+### 1.3 Start a new session from saved files
+
+Before writing, use this sequence even when the request is only "continue":
+
+1. Read the application's instructions, this workflow, and its existing rulebook; without a rulebook, read the template and establish initialization prerequisites (§1.1). Existing store files are not permission to overwrite or reinitialize them. Read provenance/local adaptations when they affect the rules. A chat handoff is navigation to inspect, not current-state evidence.
+2. List the selected store's current/candidate trees and **all submission records**. Inspect identity/status/scope, relevant attempts/events and open items to establish ownership before reading the task's remaining facts/assets. Identify orphan candidates, multiple owners and Published records awaiting promotion. Do not choose by newest filename, locale, image name or modification time. Empty directories and `.gitkeep` are not candidates. Missing/ambiguous rulebooks or incomplete records stay explicit gaps.
+3. Separate the archived `current/` baseline from a newer reported publication. Establish operation, record/attempt identity when known, task type, version applicability, locale/shared scope and requested writes. Route preparation/recovery to §4.2, status/review fixes to §4.3, promotion to §4.4, and upgrades to `upgrading.md`. Merely observing status leaves frozen candidates unchanged.
+4. Run applicable read-only checks when their runtime is available, or state manual scope/runtime/history limits. Findings locate gaps; they do not authorize guessed ownership or repair. Recheck relevant changed inputs before handoff; reuse an unchanged result with its scope/time instead of claiming another run as new evidence.
+5. Read the remaining task-specific sources/assets. Briefly identify the saved task/state, missing prerequisite and safe next action; continue independent work under §1.4. Write only after requested action and ownership are established. No separate status dashboard or handoff file is needed.
+
+An orphan Logo candidate follows §4.2 in a fresh session too. If the request does not establish identity/type/released version/scope, preserve files and seek the missing prerequisite. If those facts are supplied and no active/archive conflict exists, recover its association with one Draft without recopying the candidate. See [session examples](examples/session-handoff.md).
+
+### 1.4 Missing facts and dependent work
+
+| Gap | Work that may continue | Action that must wait |
+| --- | --- | --- |
+| Unclear ownership, task identity/type, released version or locale/shared scope | Read-only inventory/history/source inspection and located findings | Candidate/record creation or association based on a guess; conflicting active work |
+| Target package version/build/QA evidence missing after task identity is known | Independent Draft/copy preparation against confirmed facts, with pending fields/open items | Readiness assertion and dependent package/release claims |
+| Logo source/role, field requirements or visual approval unresolved | Inventory known inputs/consumers and record pending review | Invented source/requirements, approval or upload readiness |
+| Runtime/Git/required historical objects unavailable | Preserve immutable references, inspect available facts manually, record limitations | Claiming verified frozen assets, substituting HEAD/current files or promoting unverifiable content |
+| Actual submission/status evidence or explicit go-live confirmation missing | Preparation or read-only evidence reporting, with unknown external times retained | Recording actual external events from preparation alone; promotion based on "continue" |
+| Upgrade baseline/conflict unresolved | Independent comparison and recorded partial decisions | Dependent replacement/merge and declaring the upgrade completed |
+
+Ask only for the facts/decisions needed by the next dependent action. Persist gaps in the identified record's Open items/Review notes when record edits are in scope. Read-only tasks leave files unchanged; without an established record, report the gap without creating a record merely to store a handoff.
 
 ## 2. Variable interface
 
@@ -263,9 +288,22 @@ current → release-prep → submission → published → current
 When asked to initialize or perform store work, the agent:
 
 1. Reads this document, then either the rulebook (§1.2) or, on first setup, the rule template (§1.1).
-2. Inspects the application project.
-3. Determines task identity, type, confirmed released version, and scope; asks for missing prerequisites and records other unknowns as pending without inventing them.
+2. Starts from saved state under §1.3: inspects records/candidates and archive gaps, runs applicable checks, then reads relevant project facts/assets.
+3. Determines task identity, type, confirmed released version and scope; asks for missing prerequisites and continues independent work under §1.4 without inventing facts.
 4. If initializing, generates the rulebook from `templates/store-rulebook.md.template` (§3).
 5. Creates the standard structure or updates the correct directories.
 6. Generates or updates the relevant files (from templates where applicable); preparation includes its independent Draft and a complete candidate, or an explicit incomplete-work report.
-7. Reports: record ID/update type/version applicability, created/modified/unmodified paths, gaps, unresolved placeholders, and claims needing review. No new candidate is handed off without its Draft.
+7. Hands off from existing records and observed files under §5. No new candidate is handed off without its Draft.
+
+## 5. End-of-task handoff
+
+Before finishing an editing task, keep the existing record's fields, Open items and Review notes consistent with actual work. Events/attempts remain the source of submission/publication evidence; preserve earlier entries. Put gaps and their next required source/action in Open items; add concise check/evidence scope and continuation to Review notes when helpful. For an upgrade use its existing provenance history entry. Do not create a second status document, duplicate listing copy or replace events with prose. Read-only tasks report from files without writing a handoff note.
+
+Derive a short final handoff from those files:
+
+- **Task/state:** store, established record/attempt, operation/update type, status and version applicability; distinguish saved state from independently observed store state.
+- **Changed paths/scope:** created/modified paths and inspected preservation results for current/candidate/history as relevant. State incomplete deliverables explicitly; never fabricate a Draft to make the report look complete.
+- **Evidence/checks:** actual commands/manual scope, result/exit code and located findings, source/commit references and runtime/history limits. Zero structural errors do not establish readiness or authenticated external facts.
+- **Open action/next step:** missing prerequisite, who supplies user/store/application evidence, independent work that can continue, and the next dependent action. Say whether upload/certification/live comparison/go-live confirmation was actually observed; unknown stays unknown.
+
+When useful for a real handoff, keep interface-language mappings in existing Review notes. Each mapping identifies observed interface language, displayed field/section, canonical destination, source/review date, and a reference to the canonical candidate listing field or inventory entry. Customer locales are separate: a Chinese store interface does not authorize translating `en-US` copy or changing Locales. Reference canonical text rather than copying it into another table. Unobserved labels/translations stay unverified; do not invent official labels. See [the examples](examples/session-handoff.md).

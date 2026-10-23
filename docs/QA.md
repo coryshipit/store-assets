@@ -36,6 +36,23 @@ Reusable facts, prompts, input states, and expected invariants belong under `tes
 
 [Manual-upgrade scenarios](../tests/fixtures/manual-upgrade/README.md) cover I.5. Run `node tests/exercises/manual-upgrade.mjs` after changing provenance, upgrade ownership/merge rules, or release identity stamping. The constructed exercise preserves a prior-format local extension and active Draft, records a blocked/resumed upgrade with unknown original identity, and executes the actual stamping code extracted from the release workflow in a disposable staging copy. It is not an automatic updater or independent agent verification.
 
+[Session scenarios](../tests/fixtures/session-handoff/README.md) cover I.6 startup, missing facts, record-based handoff and interface/customer language separation. `node tests/exercises/session-handoff.mjs` constructs orphan/recovered/submitted artifacts and checks saved handoff references with the copied checker. These are artifact/parser checks, not a test that an independent agent follows the instructions. The scenario file also maps initialization, listing-only, package, review-fix, promotion and upgrade tasks to their versioned inputs and expected invariants.
+
+### Focused strategy review (2026-10-23, Task I.6)
+
+The `testing/qa-strategy` branch at `4e8b410850d426b8035cb0714687a4fc33487672` was inspected as design input: it changes `docs/ROADMAP.md` and adds `docs/TESTING-STRATEGY.md`. Its proposal is not merged. This file remains the QA policy; the following decisions apply to this iteration:
+
+| Proposal | Decision on this branch |
+| --- | --- |
+| Separate deterministic, agent and actual-download evidence; version inputs/invariants | Adopt, while keeping constructed artifact exercises separate from implementation and independent-agent results |
+| Select short independent scenarios by changed behavior | Adopt; the four-stage lifecycle sequence remains an optional integration diagnostic, not a required substitute for focused scenarios |
+| Explain historical silence as known context/headless causes | Retain only as hypotheses; silence without sufficient artifacts cannot establish a product or harness cause |
+| PASS/FAIL/INCONCLUSIVE with one inconclusive retry | Adopt; missing execution is `not run`, never a PASS or an automatic INCONCLUSIVE |
+| Allow deterministic/download checks to waive agent gaps | No implicit waiver: the release review still needs an explicit maintainer decision for omitted applicable behavior or unresolved INCONCLUSIVE evidence |
+| Promote a complex harness or all proposed future automation into current scope | Defer; current small checkers/artifact exercises and portable scenarios provide the available evidence |
+
+This completes the focused policy/scenario alignment for I.6; broader Task G evaluation remains open until independent execution and release-gate costs/reliability have actual evidence. A prepared scenario is not an executed scenario.
+
 For each evidence item use `PASS`, `FAIL`, or `INCONCLUSIVE`. Record a scenario that was not attempted as `not run`, with the reason; do not call it PASS or INCONCLUSIVE. Silence, timeout, or a tool failure is INCONCLUSIVE only when the available artifacts cannot decide the result. Retry an inconclusive scenario at most once, then report the evidence and limitation without assuming a harness or product cause.
 
 For development review, report passed checks and remaining behavioral coverage separately. Before release, any omitted applicable behavioral scenario or unresolved inconclusive result requires an explicit maintainer decision recorded in the release/task notes. This iteration is not a release exception.
@@ -56,6 +73,7 @@ Static, per-file checks. Do not modify any file to pass a check — fix the kit,
   - `templates/store-rulebook.md.template` at package level
   - `checking.md` and `scripts/check-store-assets.mjs` shipped together
   - `upgrading.md`, `provenance.json`, and `examples/manual-upgrade.md` ship together; source defaults and template markers agree
+  - `examples/session-handoff.md` ships with workflow startup/missing-fact/handoff sections; it creates no separate authoritative status file
   - `microsoft-store/{current, release-prep, submissions, templates}/` present
   - `microsoft-store/asset-rules.md`, its versioned JSON inventory template, and `examples/logo-assets.md` ship together
   - `apple-app-store/` and `google-play/` present as empty reserved skeletons (each with `current`, `release-prep`, `submissions`, `templates`)
@@ -72,6 +90,7 @@ Static, per-file checks. Do not modify any file to pass a check — fix the kit,
 - [ ] **Checker delivery**: the copied CLI runs without repository-only imports/npm dependencies; no files, Git index/config/objects, or submission facts are changed. Test errors/review/incomplete outcomes independently; exit 0 is not a readiness assertion.
 - [ ] **Logo roles**: technical assertions have official sources/review dates and package/product/device applicability. Each example export has a source and real upload consumer; no universal package-icon size matrix or invented MSI/EXE pixel requirement is imposed. Shared consumers and complete candidate/frozen scopes are explicit; promotion changes inventory path prefixes only. Technical, visual, upload, and live-page evidence remain distinct.
 - [ ] **Upgrade safety**: installed provenance retains unknown origin and local adaptations/history. Manual comparisons classify shipped/generated/application-owned paths and preserve all current/candidate/submission bytes and immutable references. Existing rulebooks are merged without blanket regeneration. Release stamping mutates only the staging provenance, records the actual tag/source commit and verifies upstream template markers; it never includes installed-project history.
+- [ ] **Session continuity**: ownership/state is established from all relevant saved records/candidates before writes; checks/findings are scoped and independent work can continue. Handoff uses existing record fields/Open items/Review notes, preserves event history, and references canonical copy. Interface language and customer locale remain separate; unobserved UI labels and external evidence stay unknown.
 
 ## Dry-run behavior check
 
@@ -81,12 +100,13 @@ This is the behavioral test. A fresh agent session (no prior context) verifies t
 
 | Mode | Description | Status |
 | --- | --- | --- |
-| **Staged run** | Run the four phases as separate fresh agent sessions, one phase per session, verifying the produced files after each phase. | **Recommended** |
+| **Focused scenario** | Start a fresh session from one versioned input state and perform the single affected task; inspect files/actions afterward. | **Recommended** |
+| Staged lifecycle run | Run the four integration phases as separate fresh sessions with explicit evidence and boundaries. | Optional diagnostic |
 | Full run | One session executes all four phases. | Deprecated |
 
-**Why staged runs are recommended (evidence, 2026-08-08):** three full-run attempts ended with the agent session going silent at different points: one after completing all four phases, one after phase 1, one while awaiting a go-live confirmation. Long sessions and unavailable interaction are possible harness causes; silence alone does not establish the cause or the kit's correctness. Staging keeps tasks short and permits assessment from files. Prefer independent, affected scenarios when a full lifecycle is unnecessary.
+**Historical reason to keep sessions short (2026-08-08):** three full-run attempts ended with the agent session going silent at different points: one after completing all four phases, one after phase 1, one while awaiting a go-live confirmation. Long sessions and unavailable interaction are possible harness causes; silence alone does not establish the cause or the kit's correctness. Staging remains useful for integration diagnosis; focused scenarios are the default for affected behavior.
 
-If a staged run is not feasible, a full run is still acceptable on the condition that the result is judged by the produced files, not by whether the session produced a final report.
+Select the applicable scenarios from the versioned matrix; a full run is not a fallback requirement when focused/staged execution is unavailable. If no suitable independent executor is used, record affected agent scenarios as `not run` and report the available artifact/implementation evidence separately.
 
 ### Fixture (created once, reusable)
 
@@ -106,16 +126,16 @@ Staged runs execute the workflow as four separate tasks, each with a fresh agent
 3. **Track submission** — agent updates the existing record after an explicitly supplied store event, for example `Submitted` or `In certification`. Reviewer verifies the status transition and confirms no second active submission was created.
 4. **Publish** — only because the session is explicitly told the identified attempt is live: agent records Published and the sourced confirmation date, verifies the frozen snapshot, replaces `current/<locale>/` with that approved tree, records local promotion, and removes only the completed preparation. Platform publication date stays empty unless independently supported by the supplied evidence. Reviewer verifies the promotion and history references.
 
-Each phase's task prompt must:
+Each scenario/phase's task prompt must:
 - scope the session to exactly one phase ("do only this phase, do not touch other files"),
-- state the fixture facts in full (the session has no prior context),
+- supply the fixture facts/state in files or in the task, with no prior chat/development context,
 - include the go-live confirmation when the phase needs it (phase 4 only),
-- forbid tools that ask the user questions (there is no interactive user),
+- forbid interactive question tools in a headless run; missing-prerequisite scenarios must report the missing decision and preserve dependent files instead of guessing an answer,
 - instruct the agent to stop after the phase is done.
 
 ## Run lifecycle
 
-Every run is a fresh, self-contained, disposable execution. It must never write outside its run directory and must leave nothing behind.
+Every scenario execution is fresh and disposable. Its actor must not write outside its run directory. A staged integration execution may share its one project across successive fresh sessions; the session context is fresh, while the previous phase's real outputs are the next phase's inputs. Never repair a failed output and count the repaired sequence as an agent PASS.
 
 1. **Create a run directory** under a fixed QA workspace, outside the repository and outside the fixture:
 
@@ -127,7 +147,7 @@ Every run is a fresh, self-contained, disposable execution. It must never write 
 
 2. **Copy** the current `starter-kit/` into the run directory, renamed to `store-assets/`.
 
-3. **Clear the workspace if stale**: any run directory left from an earlier run is a residue indicator. Confirm and remove it at the start of a new check (never silently; removing a run dir is safe — it is disposable).
+3. **Handle stale residue**: identify an earlier execution directory by its known path/ownership before cleanup; report discovered residue and preserve evidence needed for diagnosis. Never delete an unknown directory or reuse old outputs as a new input. Disposable runners must verify resolved cleanup targets stay in their intended temporary root.
 
 4. **Document the fixture** the run uses (app version, locale) in the run result.
 
@@ -135,22 +155,24 @@ Every run is a fresh, self-contained, disposable execution. It must never write 
 
 6. **Verify** the assertions (below), staying read-only on the repository.
 
-7. **Remove the run directory**: delete the entire run directory when the run is done. Nothing else is written anywhere. After deletion, nothing on the system is a leftover: no file apart from the repository itself was modified.
+7. **Record and clean**: inspect the artifacts/actions needed for the result, report path/hash and scope evidence, then remove the verified execution directory. Do not claim global system cleanliness from a project-only inventory; distinguish controlled project writes from executor-owned logs/caches outside the scenario. Keep reusable sources in Git, never per-run logs/artifacts.
 
-Reusing a run directory across runs is forbidden — each run gets a new one, and the workspace ends empty.
+A retry starts from the original fixture in a new directory and fresh context. At most one retry is allowed for an INCONCLUSIVE scenario; a definite FAIL calls for a fix and a new explicitly identified run. Shared directories are allowed only across phases of the same declared staged execution, never across independent scenarios or retries.
 
 ### Assertions
 
 After the run, a reviewer (or a follow-up check) verifies:
 
 - [ ] `store-assets/README.md` exists, is the static guide, and has no `{{...}}` placeholders.
-- [ ] The rulebook `<PRODUCT_NAME>-store-assets.md` exists, named per `{{RULEBOOK_FILE}}`; its examples may keep per-submission tokens per its §1 policy, but project values are resolved.
-- [ ] Directory names follow the rulebook's naming rules; `current/` was not modified before the publish step.
-- [ ] `release-prep/<locale>/` is a complete candidate snapshot that mirrors the intended `current/<locale>/` structure.
-- [ ] The submission record exists at `submissions/<submission-id>.md`, and its status reached `Published` only after the explicit go-live confirmation.
+- [ ] When initialization/generation is in scope, the rulebook exists with its required name and resolved project values. Existing local rules stay preserved for other tasks; intentional example tokens follow §1 policy.
+- [ ] Directory names follow the applicable rules; current/candidate/history contents are preserved except for the selected scenario's authorized writes.
+- [ ] When preparation is in scope, its complete locale/shared snapshots describe the intended future state; orphan/read-only cases preserve their supplied incomplete inputs.
+- [ ] A record is created/updated only when task prerequisites establish it. A supplied orphan must not acquire a guessed record. Published/promotion requires its identified attempt's explicit go-live confirmation.
 - [ ] No second active submission exists for the tested store adapter.
 - [ ] No invented product capabilities appeared in the generated copy.
-- [ ] The agent could complete the whole flow from the files alone (no missing instructions); with staged runs, this holds across the four sessions collectively.
+- [ ] For a focused scenario, its affected invariants and allowed write scope hold from files/actions alone. For a staged execution, each phase's invariants hold and all state transfer comes from the produced files. An orphan/missing-fact scenario can pass by deliberately preserving state and reporting the required decision.
+
+An intentionally broken input can produce the expected checker exit/error finding while its scenario passes: the assertion is that the omission is detected and preserved/recovered only within the task's scope. This does not make the faulty input submission-ready. Evaluate actor actions and fixture invariants separately from raw checker exit codes.
 
 ## When to run
 
@@ -172,10 +194,15 @@ These are recorded as text in the change's commit or task; per-run logs do not b
 Suggested result snippet:
 
 ```text
-QA run 2026-08-08-verify-01 — PASS
-Change under test: [one line]
-Fixture: product=fake-app locale=en-US version=v1.0.0
-Conformance: all items passed
-Dry-run: initialize → prepare and record → track → publish completed
-Cleanliness: run dir `store-assets-qa/2026-08-08-verify-01/` created and removed; no leftover files
+Change under test: [specific startup/rule/template change]
+Fixture/scenario: [versioned source and ID; kit revision/template; runtime/executor]
+Conformance: PASS [scope]
+Implementation/artifact exercise: PASS [actual assertions]
+Independent agent: not run [reason], or PASS/FAIL/INCONCLUSIVE [observed invariants/actions; attempt/retry count]
+Actual release download: not run [not a release task], or PASS/FAIL [tag/asset/source evidence]
+Cleanliness: [controlled run path and observed before/after scope; cleanup/residue; executor limits]
 ```
+
+## Release evidence review
+
+Before publishing a later release, record conformance, applicable implementation/artifact checks, selected agent scenarios, exact package source identity and actual downloaded draft asset inspection separately. Check the `store-assets/` archive root, required paths, static entry points, stamped provenance/tag/source/template consistency, and that source bytes match except for the documented provenance stamp. The maintainer explicitly accepts any omitted applicable agent scenario or unresolved INCONCLUSIVE result in release/task notes before publication; neither a local ZIP check nor a previous release exception supplies that decision. This QA procedure does not authorize pushing a tag or publishing a release.

@@ -23,6 +23,8 @@ For Logo changes, use the Microsoft-specific [asset roles and inventory guide](m
 
 To update an installed kit, follow [the manual upgrade guide](upgrading.md). Keep its [provenance record](provenance.json), compare incoming files in a separate folder, and merge local rules deliberately. The record keeps upstream release/commit/template evidence, local adaptations and upgrade history; an unknown original source stays unknown. Toolkit upgrades preserve current assets, active candidates and submission history. See [the customized-kit example](examples/manual-upgrade.md).
 
+In a new conversation, ask the agent to read the workflow and existing rulebook, inspect saved records/candidates, and identify the task before continuing. Its handoff points to the existing record, evidence, gaps and next action. A missing Draft or ambiguous ownership needs recovery; "continue" supplies no missing publication evidence. See [session examples](examples/session-handoff.md). Customer listing languages remain independent of the store interface language.
+
 ## How the kit is organized
 
 ```text
@@ -39,7 +41,8 @@ store-assets/
 │   ├── update-tasks.md            # fictional task examples, not application data
 │   ├── submission-history.md      # durable snapshots and event/date meanings
 │   ├── logo-assets.md             # source/export and upload-consumer example
-│   └── manual-upgrade.md          # customized/unknown-origin upgrade example
+│   ├── manual-upgrade.md          # customized/unknown-origin upgrade example
+│   └── session-handoff.md         # saved-state continuation and field references
 ├── scripts/
 │   └── check-store-assets.mjs      # read-only structural checks, Node.js standard library
 ├── microsoft-store/

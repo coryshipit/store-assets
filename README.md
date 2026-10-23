@@ -25,6 +25,8 @@ Microsoft Store Logo preparation includes a [sourced role mapping and inventory]
 
 Installed kits support [manual compare-and-merge upgrades](starter-kit/upgrading.md), with one provenance record for upstream source, local adaptations and upgrade history. Preserve customized rules, active candidates and historical assets; an unverified original download remains unknown.
 
+For another conversation to continue safely, the [startup and handoff rules](starter-kit/store-assets-workflow.md#13-start-a-new-session-from-saved-files) identify saved records/candidates and unresolved evidence before writing. Handoff stays in existing records and references canonical copy; customer locales remain separate from the store interface language. See the [session examples](starter-kit/examples/session-handoff.md).
+
 `starter-kit/` is the copyable work package for users; the root `AGENTS.md` governs development of Store Assets itself and should not be copied into user projects.
 
 ## 🗂️ Documentation

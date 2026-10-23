@@ -4,7 +4,7 @@ Date: 2026-10-22
 
 Branch: `iteration/dirpilot-feedback`
 
-Status: plan accepted on 2026-10-22; I.1-I.5 implemented through provenance/manual upgrades; independent workflow-agent verification remains pending
+Status: plan accepted on 2026-10-22; I.1-I.6 rules/tools/scenarios implemented; independent workflow-agent acceptance remains pending
 
 ## 1. Purpose and evidence
 
@@ -154,6 +154,8 @@ Development work:
 
 Expected paths: kit workflow/README/rulebook as applicable, `docs/QA.md`, `docs/ROADMAP.md`, and reusable scenario inputs/expected invariants.
 
+Implementation decision (2026-10-23): workflow §§1.3–1.4 establishes selected-store ownership/archive state from saved files before writes, scopes read-only checks and task facts, and separates independent preparation from dependent actions needing evidence. Workflow §5 keeps continuation in existing fields/Open items/Review notes or the current provenance entry, with a concise derived final report; read-only tasks add no notes or parallel dashboard. Interface-language mappings retain observation source/date and canonical field/inventory references without changing customer locales or copying canonical text. Rulebook template `1.7.0`, the kit session example, and ten versioned scenario tasks/invariants ship together. QA explicitly evaluates the `testing/qa-strategy` proposal, selects focused independent scenarios, distinguishes all evidence types, and clarifies staged versus retry cleanup and actual downloaded release evidence. Constructed handoff/upgrade/checker checks passed; the ten independent scenarios have not been executed, so I.6 behavioral acceptance and overall merge-readiness evidence remain pending.
+
 Acceptance:
 
 - A fresh session with only copied project files and a single task identifies an orphan Logo candidate and the safe recovery action.
@@ -192,8 +194,12 @@ For each stage, review the spec/template diff, applicable checks, remaining unce
 | Provenance storage | Implemented in I.5: kit-root provenance JSON, manual compare/merge guide, retained unknown origin/adaptations/history, staging-only release identity stamping | Artifact/stamping and standalone checks passed; independent behavior verification pending |
 | Test strategy and release gate | Focused deterministic and agent evidence; explicit handling of inconclusive runs | First behavioral change; release review |
 
+I.6 settled the focused policy/scenario alignment in `docs/QA.md`; it does not complete the broader Task G experiment or supply a release exception. Independent execution cost/reliability and the remaining behavior acceptance require observed results.
+
 ## 7. Completion and follow-up
 
 Each stage is complete only when its user-facing rules ship inside the standalone kit, applicable examples/checks demonstrate the behavior, and roadmap status matches the evidence. Do not mark an unrun scenario as passed.
 
 The iteration is ready for merge review when all selected stages have their acceptance evidence, compatibility guidance, and a coherent package layout. Tagging, publishing, pushing, and merging are separate actions and are not part of this planning task. Existing roadmap Tasks D and H remain separate unless later selected explicitly. Task G is updated only for work actually completed.
+
+Current review boundary: I.1-I.6 implementation is available, but constructed artifacts and checker tests do not complete the independent-agent acceptance criteria. Run the affected versioned scenarios independently before claiming those criteria passed. No merge/release readiness or exception is inferred from completing the implementation stages.

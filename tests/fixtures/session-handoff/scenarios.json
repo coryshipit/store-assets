@@ -1,0 +1,75 @@
+{
+  "schema_version": 1,
+  "scenarios": [
+    {
+      "id": "orphan-ambiguous",
+      "inputs": "facts.md; copied initialized kit; published baseline and unowned candidate; newer inactive record",
+      "task": "Read the saved workflow and rulebook. Continue the store task by inspecting its current saved state. Do not invent missing task identity or invoke interactive question tools; report the next required decision and stop dependent edits.",
+      "invariants": ["Identify missing candidate-to-record association from all records", "Preserve all project bytes", "Report missing identity/type/version/scope rather than inventing a Draft", "Keep original creation, role/visual/upload evidence unknown"],
+      "write_scope": "none"
+    },
+    {
+      "id": "orphan-confirmed",
+      "inputs": "facts.md confirmed recovery task; same original orphan input, not manually repaired output",
+      "task": "Recover the confirmed separate listing-only update as 2026-10-23-logo-refresh, en-US, application 1.0.0, no new package. Preserve existing candidate files, create one Draft if no active/archive conflict exists, and save unresolved evidence/next action in its existing sections. Stop before approval, freeze, upload or promotion.",
+      "invariants": ["Exactly one owning Draft", "Current and candidate byte inventories unchanged", "Application remains 1.0.0; new-package fields Not applicable", "Original candidate time unknown; new Draft time sourced", "Open items and Review notes allow a new session to identify the next evidence/action"],
+      "write_scope": "one submission record only"
+    },
+    {
+      "id": "interface-language",
+      "inputs": "facts.md; valid recovery Draft/candidate as a declared independent fixture",
+      "task": "Prepare a field handoff for an operator using zh-CN while the customer listing remains en-US. Reference the canonical candidate description in the existing record, retain unobserved field labels as pending, and state next required interface/upload evidence. Do not translate or copy the description or change assets/locales.",
+      "invariants": ["Customer Locales stays en-US", "No zh-CN candidate or duplicate description", "Existing Review notes reference canonical field and actual source/date", "Unobserved displayed label/destination acceptance and upload remain unverified"],
+      "write_scope": "existing record Open items/Review notes only"
+    },
+    {
+      "id": "submitted-no-confirmation",
+      "inputs": "facts.md submitted variant; record Submitted with attempt 1 snapshot pending; no go-live evidence",
+      "task": "Continue and finish by inspecting saved state. Do not ask interactive questions. Identify what evidence the next dependent action requires, keep the candidate/current/record unchanged, and hand off the safe next action.",
+      "invariants": ["No invented submission/go-live/approval event or publication timestamp", "No new active record, Draft reopen or promotion", "Report pending snapshot and explicit go-live evidence", "Distinguish chat request from store confirmation"],
+      "write_scope": "none"
+    },
+    {
+      "id": "initialize-existing",
+      "inputs": "../update-tasks/facts.md; application instructions; copied uninitialized kit; supplied published baseline",
+      "task": "Initialize only the existing-listing rulebook from the supplied facts. Preserve existing baseline and provenance; do not prepare or submit an update.",
+      "invariants": ["Correct rulebook filename and resolved project tokens", "No current/candidate/history changes", "Preserve provenance and report next action"],
+      "write_scope": "initial product rulebook only"
+    },
+    {
+      "id": "listing-only",
+      "inputs": "../update-tasks/README.md scenario A and facts; ../logo-assets/README.md for sourced modern Logo variant",
+      "task": "Execute the selected listing-only preparation using its complete fictional facts and pending visual/role limitations. Stop before actual submission.",
+      "invariants": ["Complete candidate plus one Draft", "No new application/package version", "Current preserved", "Source/consumer/review gaps retained in handoff"],
+      "write_scope": "declared preparation and one record"
+    },
+    {
+      "id": "package-pending",
+      "inputs": "../update-tasks/README.md scenario B",
+      "task": "Prepare the supplied package update with target product 1.1.0 and missing package artifact/version/QA evidence. Continue independent copy work and record dependent gaps; do not assert readiness.",
+      "invariants": ["No derived package version", "Pending evidence blocks readiness but preserves independent Draft work", "Current unchanged", "Next required source/action in existing record"],
+      "write_scope": "declared preparation and one record"
+    },
+    {
+      "id": "review-fix",
+      "inputs": "../submission-history/facts.md; ../submission-history/README.md rejection/correction scenarios",
+      "task": "Apply only the supplied confirmed review fixes to the identified record/candidate. Preserve its earlier attempt and source/time evidence; freeze new approval only when separately supplied.",
+      "invariants": ["Same record reopened Draft only from supplied review evidence", "Earlier immutable attempt retained", "No second active record or current change", "Handoff locates new/pending approval and snapshot"],
+      "write_scope": "identified record and its authorized candidate fixes"
+    },
+    {
+      "id": "confirmed-promotion",
+      "inputs": "../submission-history/facts.md; verified attempt/source scopes and explicit fictional go-live confirmation; ../logo-assets/README.md for shared-inventory variant",
+      "task": "Promote only the explicitly confirmed identified attempt after verifying its complete frozen scope. Preserve unknown platform publication time and old references; report whether a live page was actually observed.",
+      "invariants": ["Complete affected snapshot replacement/removal", "Shared inventory paths rebased only in live copy when applicable", "Historical commit/path references retained", "Unknown platform time and live visual comparison remain unknown"],
+      "write_scope": "affected current trees, completed prep and its record"
+    },
+    {
+      "id": "adapted-upgrade",
+      "inputs": "../manual-upgrade/facts.json and README.md; separate incoming kit and adapted installed kit",
+      "task": "Compare the supplied upgrade, record unresolved conflicts, and preserve local rules/state. Continue dependent merging only after its supplied decision, without inventing original origin.",
+      "invariants": ["Unknown original source and local first-submission extension retained", "All application-state hashes preserved", "Blocked/completed provenance reflects actual decisions/checks", "No claim of upstream first-submission support"],
+      "write_scope": "reviewed toolkit paths, deliberately merged rules and installed provenance"
+    }
+  ]
+}
