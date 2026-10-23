@@ -21,6 +21,8 @@ Submission records retain each attempt's Git snapshot and sourced event times, s
 
 The optional [read-only checker](starter-kit/checking.md) catches missing Draft associations, conflicting active submissions, field/file problems, and historical-reference gaps. From your application root, run `node store-assets/scripts/check-store-assets.mjs --root store-assets` with Node.js 22+. It reports findings without repairing files or asserting submission readiness.
 
+Microsoft Store Logo preparation includes a [sourced role mapping and inventory](starter-kit/microsoft-store/asset-rules.md): trace each export to its source and listing-language upload fields, distinguish MSIX from MSI/EXE requirements, and keep visual review separate from structural checks. See the [fictional Logo update](starter-kit/examples/logo-assets.md).
+
 `starter-kit/` is the copyable work package for users; the root `AGENTS.md` governs development of Store Assets itself and should not be copied into user projects.
 
 ## 🗂️ Documentation

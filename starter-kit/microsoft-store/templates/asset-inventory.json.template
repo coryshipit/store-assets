@@ -1,0 +1,29 @@
+{
+  "schema_version": 1,
+  "template_version": "1.0.0",
+  "package_type": "Unknown",
+  "product_type": "Unknown",
+  "device_family": "Unknown",
+  "assets": [
+    {
+      "id": "store-logo",
+      "role": "Pending — select a verified role for this product",
+      "destination": "Pending — confirm the actual upload field",
+      "locales": [],
+      "source": null,
+      "source_provenance": "Unknown — inspect origin and permission evidence",
+      "export": null,
+      "width": null,
+      "height": null,
+      "format": "Unknown",
+      "transparency": "Unknown",
+      "generation_method": "Pending — record the actual source-to-export recipe",
+      "requirements_source": "Pending — confirm the applicable official requirements",
+      "requirements_reviewed": "Unknown",
+      "review": {
+        "visual": "pending",
+        "evidence": "Pending — inspect the actual export and record reviewer/date"
+      }
+    }
+  ]
+}

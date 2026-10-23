@@ -58,11 +58,15 @@ Examples of file references:
 - `microsoft-store/release-prep/logos/store-logo.png` — explicitly included shared asset
 ```
 
-The shared path illustrates association only; it defines no required Logo layout, size, format, or upload field. Those rules belong to the store adapter and verified asset design.
+This old arbitrary shared path illustrates association only. For new/revised Logos, use the actual owned locale or `shared/` tree with `asset-inventory.json` described in [Microsoft asset rules](microsoft-store/asset-rules.md); include its complete scope in the record and frozen attempt.
 
 ## Scope and limits
 
 The checker covers active counts, candidate/record association, required fields, known statuses, task/locale applicability, required locale files, local links, tokens, source-template markers, attempt references, structured events, and date summaries. Intentional candidate additions/removals are allowed; it does not require equality with the previous live tree. A submitted or pending-promotion candidate is compared against its recorded frozen assets; a reopened Draft can differ while a new snapshot is pending.
+
+For `current/` and `release-prep/` inventories, it also checks JSON structure, source/export paths and files, unique role/language assignments, record consumer/scope coverage, declared metadata, PNG header dimensions, and verified MSIX app-tile constraints. MSI/EXE box/poster aspect ratios follow the named roles; numeric dimensions/encoding/file-limit acceptance needs upload-field review. Missing legacy inventories, unsupported roles/profiles, pending facts, and visual evidence are review findings. An explicit inventory makes unlisted owned exports errors. Empty `assets` is allowed for a recorded last-export removal. See [the inventory contract](microsoft-store/asset-rules.md).
+
+Historical inventory source/export references resolve within their stored attempt. Historical metadata and PNG technical rules are not revalidated against today's profile; inspect those at their original commit when needed. Current path rebasing at promotion does not rewrite that history. The checker reads PNG signature/IHDR only; it does not decode pixels, validate image integrity/alpha, verify permissions, authenticate approval, or prove remote upload/live rendering.
 
 Historical references are checked in their recorded commits, not today's `current/`. Shallow/partial checkouts missing required objects produce incomplete results; existing references are retained and no fetch occurs. LFS pointers, submodules, filters/encodings, unstructured provenance, and large historical Markdown link sets require explicit review. Limited Git text normalization is accounted for without executing content filters; upload binary bytes remain distinct from Git's normalized text representation.
 

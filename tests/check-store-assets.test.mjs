@@ -4,6 +4,7 @@ import * as fs from 'node:fs';
 import path from 'node:path';
 import os from 'node:os';
 import crypto from 'node:crypto';
+import { deflateSync } from 'node:zlib';
 import { spawnSync } from 'node:child_process';
 import { fileURLToPath, pathToFileURL } from 'node:url';
 import { checkStoreAssets } from '../starter-kit/scripts/check-store-assets.mjs';
@@ -365,8 +366,182 @@ test('CLI root is explicit and only Microsoft adapter is executable', t => {
   }
 });
 test('copied script operates standalone through CLI and creates no files', t => {
-  const f = fixture(t); candidate(f); record(f);
+  const f = fixture(t); candidate(f); logo(f, { scope: 'en-US' }); record(f);
   const before = tree(f.project), copied = path.join(f.root, 'scripts/check-store-assets.mjs');
   const result = spawnSync(process.execPath, [copied, '--root', f.root, '--json'], { cwd: os.tmpdir(), encoding: 'utf8', windowsHide: true });
   assert.equal(result.status, 0, result.stderr || result.stdout); assert.equal(JSON.parse(result.stdout).exit_code, 0); assert.deepEqual(tree(f.project), before);
+});
+
+// Synthetic PNG bytes are fixture data, never product artwork or visual approval.
+function png(width, height) {
+  function chunk(type, data) {
+    const body = Buffer.concat([Buffer.from(type), data]), size = Buffer.alloc(4), crc = Buffer.alloc(4);
+    size.writeUInt32BE(data.length); let sum = 0xffffffff;
+    for (const byte of body) {
+      sum ^= byte;
+      for (let bit = 0; bit < 8; bit++) sum = (sum >>> 1) ^ ((sum & 1) ? 0xedb88320 : 0);
+    }
+    crc.writeUInt32BE((sum ^ 0xffffffff) >>> 0); return Buffer.concat([size, body, crc]);
+  }
+  const header = Buffer.alloc(13); header.writeUInt32BE(width); header.writeUInt32BE(height, 4); header[8] = 8; header[9] = 2;
+  return Buffer.concat([Buffer.from([137, 80, 78, 71, 13, 10, 26, 10]), chunk('IHDR', header),
+    chunk('IDAT', deflateSync(Buffer.alloc(height * (width * 3 + 1)))), chunk('IEND', Buffer.alloc(0))]);
+}
+function logo(f, { scope = 'shared', locales = ['en-US'], route = 'msix', role = 'msix-app-tile', width = 300, height = 300 } = {}) {
+  const base = 'microsoft-store/release-prep/' + scope, file = path.join(f.root, base, 'asset-inventory.json');
+  const destinations = { 'msix-app-tile': '1:1 App tile icon', 'msi-exe-box': '1:1 box art', 'msi-exe-poster': '2:3 poster art' };
+  const asset = { id: 'store-logo', role, destination: 'Store listings > Store logos > ' + destinations[role], locales,
+    source: base + '/logos/source/mark.svg', source_provenance: 'Fictional supplied source; permission recorded by fixture',
+    export: base + '/logos/export/store-logo.png', width, height, format: 'png', transparency: 'absent',
+    generation_method: 'Synthetic fixture PNG; no artistic/visual approval',
+    requirements_source: 'https://learn.microsoft.com/en-us/windows/apps/publish/publish-your-app/' + (route === 'msix' ? 'msix' : 'msi') + '/screenshots-and-images#store-logos',
+    requirements_reviewed: '2026-10-23', review: { visual: 'pending', evidence: 'Pending — human inspection' } };
+  const inventory = { schema_version: 1, template_version: '1.0.0', package_type: route, product_type: 'app', device_family: 'Desktop', assets: [asset] };
+  write(path.join(f.root, asset.source), '<svg xmlns="http://www.w3.org/2000/svg" width="300" height="300"><rect width="300" height="300"/></svg>');
+  const image = path.join(f.root, asset.export); write(image, png(width, height));
+  const save = () => write(file, JSON.stringify(inventory, null, 2)); save();
+  return { file, inventory, asset, image, save, base };
+}
+function logoDraft(f, scopes = ['en-US', 'shared'], options = {}) {
+  candidate(f); return record(f, { refs: scopes.map(scope => 'microsoft-store/release-prep/' + scope), ...options });
+}
+
+test('shared MSIX Logo maps consumers and remains read-only with pending visual review', t => {
+  const f = fixture(t); logoDraft(f); logo(f); init(f);
+  const before = tree(f.project), report = checkStoreAssets(f.root);
+  assert.equal(report.exit_code, 0, JSON.stringify(report)); contains(report, 'ASSET_VISUAL_REVIEW'); assert.deepEqual(tree(f.project), before);
+});
+test('localized Logo has a single localized consumer and needs no shared scope', t => {
+  const f = fixture(t); logoDraft(f, ['en-US']); logo(f, { scope: 'en-US' });
+  assert.equal(checkStoreAssets(f.root).exit_code, 0);
+});
+test('MSI/EXE roles use their own aspect ratio and leave pixel acceptance for review', t => {
+  for (const [role, width, height] of [['msi-exe-box', 256, 256], ['msi-exe-poster', 200, 300]]) {
+    const f = fixture(t); logoDraft(f); logo(f, { role, width, height, route: 'msi-exe' });
+    const report = checkStoreAssets(f.root); assert.equal(report.exit_code, 0, JSON.stringify(report)); contains(report, 'ASSET_REQUIREMENTS_REVIEW');
+    assert.ok(!codes(report).includes('ASSET_MSIX_TILE'));
+  }
+});
+test('MSIX app tile role cannot be silently assigned to an MSI/EXE application', t => {
+  const f = fixture(t); logoDraft(f); logo(f, { route: 'msi-exe' }); contains(checkStoreAssets(f.root), 'ASSET_ROLE_PROFILE');
+});
+test('known role destination must match its verified upload field', t => {
+  const f = fixture(t); logoDraft(f); const l = logo(f); l.asset.destination = 'Packages > StoreLogo'; l.save();
+  contains(checkStoreAssets(f.root), 'ASSET_DESTINATION');
+});
+test('game and unknown roles receive review without borrowed app tile constraints', t => {
+  const f = fixture(t); logoDraft(f); const l = logo(f, { width: 256, height: 256 });
+  l.inventory.product_type = 'game'; l.save();
+  let report = checkStoreAssets(f.root); assert.equal(report.exit_code, 0); contains(report, 'ASSET_PROFILE_REVIEW'); assert.ok(!codes(report).includes('ASSET_MSIX_TILE'));
+  l.inventory.product_type = 'app'; l.asset.role = 'local-extension'; l.save(); report = checkStoreAssets(f.root);
+  contains(report, 'ASSET_ROLE_REVIEW'); assert.ok(!codes(report).includes('ASSET_MSIX_TILE'));
+});
+test('incorrect actual MSIX dimensions and false declared dimensions are located', t => {
+  const f = fixture(t); logoDraft(f); const l = logo(f, { width: 256, height: 256 });
+  contains(checkStoreAssets(f.root), 'ASSET_MSIX_TILE'); l.asset.width = 300; l.asset.height = 300; l.save();
+  const report = checkStoreAssets(f.root); contains(report, 'ASSET_DIMENSIONS'); contains(report, 'ASSET_MSIX_TILE');
+});
+test('PNG extension alone cannot disguise non-PNG bytes or wrong declared format', t => {
+  const f = fixture(t); logoDraft(f); const l = logo(f); write(l.image, 'not an image');
+  contains(checkStoreAssets(f.root), 'ASSET_PNG_HEADER'); l.asset.format = 'jpeg'; l.save();
+  contains(checkStoreAssets(f.root), 'ASSET_FORMAT');
+});
+test('MSIX Logo file ceiling is checked without reading a large image into memory', t => {
+  const f = fixture(t); logoDraft(f); const l = logo(f); fs.truncateSync(l.image, 50_000_001);
+  contains(checkStoreAssets(f.root), 'ASSET_MSIX_TILE');
+});
+test('missing Logo source or export is a structural error', t => {
+  const f = fixture(t); logoDraft(f); const l = logo(f); fs.unlinkSync(path.join(f.root, l.asset.source)); fs.unlinkSync(l.image);
+  const report = checkStoreAssets(f.root); contains(report, 'ASSET_FILE_MISSING'); assert.equal(report.exit_code, 1);
+});
+test('pending source/export facts are preserved without guessed readiness', t => {
+  const f = fixture(t); logoDraft(f); const l = logo(f); fs.unlinkSync(l.image);
+  Object.assign(l.asset, { source: null, export: null, width: null, height: null, transparency: 'Unknown', source_provenance: 'Unknown — supplied without origin' }); l.save();
+  const before = tree(f.project), report = checkStoreAssets(f.root); assert.equal(report.exit_code, 0, JSON.stringify(report)); contains(report, 'ASSET_PENDING'); assert.deepEqual(tree(f.project), before);
+});
+test('duplicate language-role assignments across shared/localized inventories are errors', t => {
+  const f = fixture(t); logoDraft(f); logo(f); logo(f, { scope: 'en-US' });
+  contains(checkStoreAssets(f.root), 'ASSET_DESTINATION_DUPLICATE');
+});
+test('Logo inventories constrain source/export ownership and state', t => {
+  const f = fixture(t); logoDraft(f, ['en-US']); const l = logo(f, { scope: 'en-US' });
+  l.asset.source = '../private.svg'; l.save(); contains(checkStoreAssets(f.root), 'PATH_SCOPE');
+  l.asset.source = 'microsoft-store/current/en-US/logos/source/mark.svg'; l.save(); contains(checkStoreAssets(f.root), 'ASSET_PATH_SCOPE');
+  l.asset.export = 'microsoft-store/release-prep/shared/logos/export/store-logo.png'; l.save(); contains(checkStoreAssets(f.root), 'ASSET_PATH_SCOPE');
+});
+test('unlisted exports are errors once their owned inventory is explicit', t => {
+  const f = fixture(t); logoDraft(f); const l = logo(f); write(path.join(path.dirname(l.image), 'unused-size.png'), png(150, 150));
+  contains(checkStoreAssets(f.root), 'ASSET_EXPORT_UNLISTED');
+});
+test('legacy Logo files require mapping review and are not automatically migrated', t => {
+  const f = fixture(t); logoDraft(f); write(path.join(f.root, 'microsoft-store/release-prep/shared/logos/export/old.png'), png(256, 256));
+  const before = tree(f.project), report = checkStoreAssets(f.root); assert.equal(report.exit_code, 0); contains(report, 'ASSET_INVENTORY_MISSING'); assert.deepEqual(tree(f.project), before);
+});
+test('shared sources in localized inventories require explicit shared record coverage', t => {
+  const f = fixture(t); logoDraft(f, ['en-US']); const l = logo(f, { scope: 'en-US' }), shared = logo(f);
+  l.asset.source = shared.asset.source; l.save(); fs.unlinkSync(shared.file); fs.unlinkSync(shared.image);
+  contains(checkStoreAssets(f.root), 'ASSET_RECORD_SCOPE');
+  record(f, { refs: ['microsoft-store/release-prep/en-US', 'microsoft-store/release-prep/shared'] });
+  assert.equal(checkStoreAssets(f.root).exit_code, 0);
+});
+test('all shared export consumers must appear in the Draft and own complete locale candidates', t => {
+  const f = fixture(t); logoDraft(f); logo(f, { locales: ['en-US', 'zh-CN'] });
+  contains(checkStoreAssets(f.root), 'ASSET_RECORD_LOCALES');
+  fs.cpSync(f.current, path.join(f.root, 'microsoft-store/release-prep/zh-CN'), { recursive: true });
+  record(f, { fields: { Locales: 'en-US, zh-CN' }, refs: ['microsoft-store/release-prep/en-US', 'microsoft-store/release-prep/zh-CN', 'microsoft-store/release-prep/shared'] });
+  assert.equal(checkStoreAssets(f.root).exit_code, 0);
+});
+test('unchanged shared consumers need no unrelated locale preparation, but byte changes and removals do', t => {
+  const f = fixture(t); logoDraft(f); const l = logo(f, { locales: ['en-US', 'zh-CN'] });
+  const live = path.join(f.root, 'microsoft-store/current/shared'); fs.cpSync(path.dirname(l.file), live, { recursive: true });
+  const baseline = JSON.parse(JSON.stringify(l.inventory));
+  for (const asset of baseline.assets) for (const field of ['source', 'export']) asset[field] = asset[field].replace('/release-prep/', '/current/');
+  write(path.join(live, 'asset-inventory.json'), JSON.stringify(baseline));
+  assert.equal(checkStoreAssets(f.root).exit_code, 0);
+  fs.appendFileSync(path.join(f.root, l.asset.source), '\n'); contains(checkStoreAssets(f.root), 'ASSET_RECORD_LOCALES');
+  fs.copyFileSync(path.join(live, 'logos/source/mark.svg'), path.join(f.root, l.asset.source));
+  assert.equal(checkStoreAssets(f.root).exit_code, 0);
+  fs.unlinkSync(l.image); l.inventory.assets = []; l.save(); contains(checkStoreAssets(f.root), 'ASSET_RECORD_LOCALES');
+});
+test('individual shared source references do not replace the complete shared record scope', t => {
+  const f = fixture(t); candidate(f); const l = logo(f, { scope: 'en-US' });
+  const shared = 'microsoft-store/release-prep/shared/logos/source/mark.svg'; write(path.join(f.root, shared), '<svg/>');
+  l.asset.source = shared; l.save(); record(f, { refs: ['microsoft-store/release-prep/en-US', shared] });
+  contains(checkStoreAssets(f.root), 'ASSET_RECORD_SHARED_SCOPE');
+});
+test('malformed or unsupported inventory does not imply successful platform validation', t => {
+  const f = fixture(t); logoDraft(f); const l = logo(f); write(l.file, '{'); contains(checkStoreAssets(f.root), 'INVENTORY_JSON');
+  l.inventory.schema_version = 2; l.save(); contains(checkStoreAssets(f.root), 'INVENTORY_SCHEMA');
+  l.inventory.schema_version = 1; l.inventory.assets = null; l.save(); contains(checkStoreAssets(f.root), 'INVENTORY_FIELDS');
+});
+test('explicit empty inventory permits intended removal of the last Logo export', t => {
+  const f = fixture(t); logoDraft(f); const l = logo(f); fs.unlinkSync(l.image); l.inventory.assets = []; l.save();
+  assert.equal(checkStoreAssets(f.root).exit_code, 0);
+});
+test('recorded visual approval is evidence to review, never automatic approval', t => {
+  const f = fixture(t); logoDraft(f); const l = logo(f); l.asset.review = { visual: 'approved', evidence: 'Fictional reviewer/date with exact export revision' }; l.save();
+  const report = checkStoreAssets(f.root); assert.equal(report.exit_code, 0); contains(report, 'ASSET_APPROVAL_EVIDENCE');
+});
+test('a shared attempt must freeze full inventory/source/export scope', t => {
+  const f = fixture(t); init(f); logoDraft(f); logo(f); const commit = freeze(f);
+  const paths = ['store-assets/microsoft-store/release-prep/en-US', 'store-assets/microsoft-store/release-prep/shared/asset-inventory.json', 'store-assets/microsoft-store/release-prep/shared/logos/export'];
+  submitted(f, commit, { refs: ['microsoft-store/release-prep/en-US', 'microsoft-store/release-prep/shared'], attempts: [{ id: 1, commit, paths }] });
+  const report = checkStoreAssets(f.root); contains(report, 'SNAPSHOT_SHARED_SCOPE'); contains(report, 'HISTORICAL_INVENTORY_ASSET');
+});
+test('promotion rebases only working inventory paths and old attempts resolve their original assets', t => {
+  const f = fixture(t); init(f); logoDraft(f); const l = logo(f); const commit = freeze(f), paths = ['store-assets/microsoft-store/release-prep/en-US', 'store-assets/microsoft-store/release-prep/shared'];
+  const refs = ['microsoft-store/release-prep/en-US', 'microsoft-store/release-prep/shared'];
+  submitted(f, commit, { refs, attempts: [{ id: 1, commit, paths }] });
+  assert.equal(checkStoreAssets(f.root).exit_code, 0);
+  const original = fs.readFileSync(l.image), liveShared = path.join(f.root, 'microsoft-store/current/shared');
+  fs.cpSync(path.dirname(l.file), liveShared, { recursive: true });
+  const liveInventory = JSON.parse(fs.readFileSync(l.file, 'utf8'));
+  for (const asset of liveInventory.assets) for (const key of ['source', 'export']) asset[key] = asset[key].replace('/release-prep/', '/current/');
+  write(path.join(liveShared, 'asset-inventory.json'), JSON.stringify(liveInventory, null, 2));
+  fs.cpSync(f.candidate, f.current, { recursive: true }); removeInside(f.project, f.candidate); removeInside(f.project, path.dirname(l.file));
+  record(f, { refs, fields: { Status: 'Published' }, attempts: [{ id: 1, commit, paths }],
+    events: [event(1, 'draft-created'), event(2, 'submitted', '1'), event(3, 'go-live-confirmed', '1'), event(4, 'promoted', '1')] });
+  const before = tree(f.project), report = checkStoreAssets(f.root); assert.equal(report.exit_code, 0, JSON.stringify(report)); assert.deepEqual(tree(f.project), before);
+  assert.deepEqual(fs.readFileSync(path.join(liveShared, 'logos/export/store-logo.png')), original);
+  const old = git(f, 'show', commit + ':store-assets/microsoft-store/release-prep/shared/asset-inventory.json'); assert.ok(old.includes('/release-prep/'));
 });

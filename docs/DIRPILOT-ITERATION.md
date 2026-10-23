@@ -4,7 +4,7 @@ Date: 2026-10-22
 
 Branch: `iteration/dirpilot-feedback`
 
-Status: plan accepted on 2026-10-22; I.1/I.2 rules/examples and I.3 checker implemented; independent workflow-agent verification remains pending
+Status: plan accepted on 2026-10-22; I.1/I.2 rules/examples, I.3 checker, and I.4 Logo inventory/mapping implemented; independent workflow-agent verification remains pending
 
 ## 1. Purpose and evidence
 
@@ -112,6 +112,10 @@ Development work:
 
 Expected paths: Microsoft-specific rules/examples in `starter-kit/`, workflow/rulebook references, checker and fixtures. Exact inventory filename and asset directory layout remain design decisions for this stage.
 
+Implementation decision (2026-10-23): the copied Microsoft adapter now ships `asset-rules.md` and `templates/asset-inventory.json.template` (inventory schema/template `1` / `1.0.0`). Inventories live at `<state>/<locale-or-shared>/asset-inventory.json`, with owned `logos/source/` and `logos/export/`; existing screenshot layout is unchanged. Paths are kit-root-relative and state-specific, rebased only in copied/prepared or promoted inventories. Shared files have explicit per-language consumers and complete tree/snapshot ownership. The checker compares the shared candidate with its archived baseline so unchanged consumers do not require unrelated locale preparation; changed/removed rows and source/export bytes retain all affected consumers.
+
+Official sources reviewed on 2026-10-23 establish the MSIX Desktop application tile's 300 x 300 PNG role and the distinct MSI/EXE box/poster roles. The latter page does not establish numeric sizes/encoding/alpha acceptance, so those remain sourced upload-field review items. Game/Xbox/PWA-specific roles and screenshot technical validation are outside this implementation's automatic role checks. Rulebook template `1.5.0`, the fictional Logo example, checker extensions, reusable scenarios, and packaging requirements ship together. Legacy files receive review findings, not inferred mappings or automatic migration.
+
 Acceptance:
 
 - Every example export maps to a documented upload field and a traceable source.
@@ -182,7 +186,7 @@ For each stage, review the spec/template diff, applicable checks, remaining unce
 | Record format and legacy fields | Implemented in template 1.4.0: readable attempt/event sections, explicit checkable path/status-note conventions, distinct date meanings and deliberate legacy handling | I.3 parser/tests implemented; custom/legacy gaps remain review findings |
 | Snapshot timing and resubmission references | Implemented in I.2: approved full candidate commit precedes its record reference; retain every attempt, reverify before promotion, expose unavailable history | Independent behavior verification pending |
 | Checker runtime and format | Delivered: one optional Node.js 22+ standard-library module, explicit root/store, text/JSON findings, exit 0/1/2, no writes or network retrieval | I.3 runtime decision settled; standalone tests passed on Node.js 24 / Git for Windows |
-| Asset inventory location and shared assets | Decide from verified Microsoft roles; preserve screenshot conventions | I.4 implementation |
+| Asset inventory location and shared assets | Implemented in I.4: Microsoft-specific per-locale/shared JSON inventories with owned Logo source/export directories, named language consumers, complete shared snapshots, and path-only rebasing; screenshot conventions retained | Deterministic/standalone checks passed; independent behavior verification pending |
 | Provenance storage | One compact origin/adaptation record; unknown is allowed | I.5 implementation |
 | Test strategy and release gate | Focused deterministic and agent evidence; explicit handling of inconclusive runs | First behavioral change; release review |
 

@@ -32,6 +32,8 @@ Reusable facts, prompts, input states, and expected invariants belong under `tes
 
 [Checker scenarios](../tests/fixtures/checker/README.md) cover I.3 with the executable Node.js test suite. Run `node --test --test-reporter=spec tests/check-store-assets.test.mjs` after changing its parser, rules, Git access, output, or packaged invocation. Tests compare file/content inventories including local Git metadata, and exercise the script copied outside this repository. The user-facing invocation, parsing scope, and limits live in `starter-kit/checking.md`.
 
+[Logo scenarios](../tests/fixtures/logo-assets/README.md) extend that suite for I.4: verified package-route roles, source/export/consumer mapping, PNG header checks, pending visual evidence, complete shared snapshots, and promotion path rebasing. Synthetic images are generated only in disposable execution copies. These implementation/artifact checks do not constitute fresh-agent behavior or live Store rendering evidence.
+
 For each evidence item use `PASS`, `FAIL`, or `INCONCLUSIVE`. Record a scenario that was not attempted as `not run`, with the reason; do not call it PASS or INCONCLUSIVE. Silence, timeout, or a tool failure is INCONCLUSIVE only when the available artifacts cannot decide the result. Retry an inconclusive scenario at most once, then report the evidence and limitation without assuming a harness or product cause.
 
 For development review, report passed checks and remaining behavioral coverage separately. Before release, any omitted applicable behavioral scenario or unresolved inconclusive result requires an explicit maintainer decision recorded in the release/task notes. This iteration is not a release exception.
@@ -52,10 +54,11 @@ Static, per-file checks. Do not modify any file to pass a check — fix the kit,
   - `templates/store-rulebook.md.template` at package level
   - `checking.md` and `scripts/check-store-assets.mjs` shipped together
   - `microsoft-store/{current, release-prep, submissions, templates}/` present
+  - `microsoft-store/asset-rules.md`, its versioned JSON inventory template, and `examples/logo-assets.md` ship together
   - `apple-app-store/` and `google-play/` present as empty reserved skeletons (each with `current`, `release-prep`, `submissions`, `templates`)
 - [ ] **Static README**: the kit ships exactly one `README.md` (a static package overview, zero placeholders), plus the workflow and the rulebook template. It ships no `AGENTS.md`.
 - [ ] **Placeholder discipline**: every `{{TOKEN}}` outside `templates/` is intentional spec text (variable tables, naming examples); generated documents never carry unresolved placeholders.
-- [ ] **Template discipline**: every `templates/*.template` keeps its placeholders and its `template_version`; a version bump accompanies a template content change.
+- [ ] **Template discipline**: every template keeps its format's `template_version`; a version bump accompanies a template content change. Rulebook placeholders remain intentional; the JSON inventory template uses explicit unknown/null/pending inputs for task-time completion.
 - [ ] **Placeholder policy**: the static README has zero placeholders; the generated rulebook may retain per-submission tokens (`LOCALE`, `SUBMISSION_ID`, `APPLICATION_VERSION`, `PUBLICATION_DATE`, `STATUS`) **only inside examples/file skeletons**, declared by its §1 placeholder policy.
 - [ ] **Naming rules** (`store-rulebook.md.template` §5): directories lowercase kebab-case; locales official codes; files short lowercase kebab-case; no `final`/`new`/`latest`-style version words in screenshot names.
 - [ ] **Relative links resolve**: every path referenced from a kit document exists (workflow → templates, DISTRIBUTION → kit, README → docs).
@@ -64,6 +67,7 @@ Static, per-file checks. Do not modify any file to pass a check — fix the kit,
 - [ ] **Historical references**: attempt examples use complete candidate scope and distinguish working paths from immutable Git references. No new requirement assumes the referencing record is already inside its assets commit.
 - [ ] **Time semantics**: actual submission/platform dates, go-live receipt dates, and event observation/recording times are distinct. Published status is compatible with an unknown platform date; legacy dates are not silently reinterpreted.
 - [ ] **Checker delivery**: the copied CLI runs without repository-only imports/npm dependencies; no files, Git index/config/objects, or submission facts are changed. Test errors/review/incomplete outcomes independently; exit 0 is not a readiness assertion.
+- [ ] **Logo roles**: technical assertions have official sources/review dates and package/product/device applicability. Each example export has a source and real upload consumer; no universal package-icon size matrix or invented MSI/EXE pixel requirement is imposed. Shared consumers and complete candidate/frozen scopes are explicit; promotion changes inventory path prefixes only. Technical, visual, upload, and live-page evidence remain distinct.
 
 ## Dry-run behavior check
 

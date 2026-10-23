@@ -26,6 +26,7 @@ The user-facing package plays the role that the reference project layout drafts 
 | Ready-for-submission checklist | `templates/store-rulebook.md.template` §9 |
 | Package entry document | static `README.md` (shipped in `starter-kit/`, no placeholders) |
 | Optional structural checks | `checking.md` + `scripts/check-store-assets.mjs` (read-only; does not authenticate evidence or publish) |
+| Microsoft listing Logo roles and ownership | `microsoft-store/asset-rules.md` + `microsoft-store/templates/asset-inventory.json.template` (store-specific, with official sources and review date) |
 
 Intentional differences from the reference layout:
 

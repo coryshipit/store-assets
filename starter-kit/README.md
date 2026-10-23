@@ -19,6 +19,8 @@ Before actual submission, bind the approved complete candidate to a verified Git
 
 For a read-only structural check, run `node store-assets/scripts/check-store-assets.mjs --root store-assets` from your application root (Node.js 22+). It reports errors and review items without modifying files. See [checking.md](checking.md) for Git requirements, record syntax, and exit codes; zero errors does not mean ready for submission.
 
+For Logo changes, use the Microsoft-specific [asset roles and inventory guide](microsoft-store/asset-rules.md) and [Logo example](examples/logo-assets.md). Each export names its source, listing language consumers, and upload field. MSIX listing Logos and MSI/EXE box/poster art have distinct rules; package icons are separate application assets. Inventories support localized ownership or deliberate sharing without changing screenshot directories.
+
 ## How the kit is organized
 
 ```text
@@ -31,14 +33,16 @@ store-assets/
 │   └── store-rulebook.md.template # rule source; generates the rulebook
 ├── examples/
 │   ├── update-tasks.md            # fictional task examples, not application data
-│   └── submission-history.md      # durable snapshots and event/date meanings
+│   ├── submission-history.md      # durable snapshots and event/date meanings
+│   └── logo-assets.md             # source/export and upload-consumer example
 ├── scripts/
 │   └── check-store-assets.mjs      # read-only structural checks, Node.js standard library
 ├── microsoft-store/
+│   ├── asset-rules.md             # verified Logo roles and inventory contract
 │   ├── current/                  # live, published assets (per locale)
 │   ├── release-prep/             # draft assets (per locale)
 │   ├── submissions/              # one record file per submission
-│   └── templates/                # store record template sources (reserved)
+│   └── templates/                # asset-inventory.json.template
 ├── apple-app-store/              # reserved skeleton (future adapter)
 └── google-play/                  # reserved skeleton (future adapter)
 ```

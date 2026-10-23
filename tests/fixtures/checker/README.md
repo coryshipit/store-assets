@@ -31,6 +31,8 @@ Every case uses an isolated OS-temporary project. Local Git cases use a fictiona
 | Unknown platform time with explicit user confirmation | Published and confirmation date may coexist with an empty platform date |
 | Copied script invoked from outside its project | CLI works without repository-only modules or npm packages |
 
+I.4 extends this suite with [Logo inventory scenarios](../logo-assets/README.md): route-specific roles, source/export/consumer ownership, declared metadata and PNG headers, explicit visual/requirements gaps, complete shared/history scopes, and promotion path rebasing. Generated PNGs are disposable synthetic input, not shipped product artwork.
+
 ## Read-only evidence
 
 Positive, negative, legacy, Git, and copied-CLI cases compare file-path/content-hash inventories before and after checking. Git cases include `.git/index`, object files, and configuration in that inventory. Symlinks are represented as links rather than followed by the inventory helper. Empty status alone is not the proof of read-only operation.

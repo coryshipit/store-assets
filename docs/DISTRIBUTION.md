@@ -35,14 +35,16 @@ store-assets/
 │   └── store-rulebook.md.template
 ├── examples/
 │   ├── update-tasks.md            # fictional task examples
-│   └── submission-history.md      # snapshot and time examples
+│   ├── submission-history.md      # snapshot and time examples
+│   └── logo-assets.md             # listing Logo sources and upload consumers
 ├── scripts/
 │   └── check-store-assets.mjs      # standalone Node.js standard-library checker
 ├── microsoft-store/
+│   ├── asset-rules.md             # sourced roles and inventory ownership
 │   ├── current/
 │   ├── release-prep/
 │   ├── submissions/
-│   └── templates/
+│   └── templates/                # includes asset-inventory.json.template
 ├── apple-app-store/               # reserved skeleton
 ├── google-play/                   # reserved skeleton
 └── ...
@@ -55,6 +57,7 @@ Rules for what is included and what is not:
 - Do not include the root repo's development documents (e.g. `reference/`, `docs/`, root `README.md`, root `AGENTS.md`).
 - The packaged kit must be readable and usable on its own, without any context from the repository.
 - Include the optional checker and its guide. No dependency install or repository-only module is needed; Node.js is supplied by the application developer. The release archive check requires these files but does not run an application's validation or upload anything to a store.
+- Include Microsoft asset rules, the JSON inventory template, and the fictional Logo example. They remain readable in an isolated download; source URLs and review dates ship with the rules. Actual product inventories and artwork are generated in the application project and are not included in this kit.
 
 ## Versioning and release artifacts
 

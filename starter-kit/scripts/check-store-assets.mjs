@@ -12,6 +12,11 @@ const EVENTS = new Set(['draft-created', 'submitted', 'status-observed', 'draft-
 const EXAMPLE_TOKENS = new Set(['LOCALE', 'SUBMISSION_ID', 'APPLICATION_VERSION', 'PUBLICATION_DATE', 'STATUS']);
 const HEADER = ['Submission ID', 'Draft created date', 'Submission date', 'Released application version', 'Application version', 'Update type', 'New package version', 'Package evidence', 'Store submission ID', 'Locales', 'Status', 'Publication date', 'Publication confirmed date'];
 const SECTIONS = ['Changes', 'Submitted files', 'Submission attempts', 'Events', 'Open items', 'Certification result', 'Review notes'];
+const LOGO_ROLES = {
+  'msix-app-tile': { route: 'msix', destination: 'Store listings > Store logos > 1:1 App tile icon', ratio: [1, 1] },
+  'msi-exe-box': { route: 'msi-exe', destination: 'Store listings > Store logos > 1:1 box art', ratio: [1, 1] },
+  'msi-exe-poster': { route: 'msi-exe', destination: 'Store listings > Store logos > 2:3 poster art', ratio: [2, 3] },
+};
 const pending = value => /^Pending\b/i.test(value || '');
 const unknown = value => !value || value === 'Unknown' || pending(value);
 const slash = value => value.split(path.sep).join('/');
@@ -285,6 +290,26 @@ export function checkStoreAssets(input, { store = 'microsoft-store', gitExecutab
         const scopes = ['release-prep', 'current'].map(state => [kitPrefix, store, state, locale].filter(Boolean).join('/'));
         if (!attempt.paths.some(item => scopes.some(scope => item.value === scope || scope.startsWith(item.value.replace(/\/$/, '') + '/')))) add('error', 'SNAPSHOT_LOCALE_SCOPE', record.file, attempt.line, 'Snapshot paths must cover the complete affected locale tree: ' + locale + ', not only one changed file.');
       }
+      if (attempt.entries.size && record.refs.some(ref => ref.value === store + '/release-prep/shared' || ref.value.startsWith(store + '/release-prep/shared/'))) {
+        const scopes = ['release-prep', 'current'].map(state => [kitPrefix, store, state, 'shared'].filter(Boolean).join('/'));
+        if (!attempt.paths.some(item => scopes.some(scope => item.value === scope || scope.startsWith(item.value.replace(/\/$/, '') + '/')))) add('error', 'SNAPSHOT_SHARED_SCOPE', record.file, attempt.line, 'Snapshot paths must cover the complete shared candidate tree, not only its changed export.');
+      }
+      for (const entry of attempt.entries.values()) if (entry.type === 'blob' && entry.mode !== '120000' && entry.name.endsWith('/asset-inventory.json')) {
+        if (entry.size > 512 * 1024) { add('review', 'HISTORICAL_INVENTORY_SIZE', record.file, attempt.line, 'Large historical inventory requires manual review.'); continue; }
+        const blob = git(['cat-file', 'blob', entry.oid], gitRoot);
+        if (blob.error || blob.status !== 0) { fail('SNAPSHOT_CONTENT_UNAVAILABLE', record.file, 'Historical inventory is unavailable locally.'); continue; }
+        let inventory;
+        try { inventory = JSON.parse(blob.stdout.toString('utf8').replace(/^\uFEFF/, '')); }
+        catch { add('error', 'HISTORICAL_INVENTORY_JSON', record.file, attempt.line, 'Historical inventory is invalid JSON: ' + entry.name); continue; }
+        if (inventory?.schema_version !== 1 || !Array.isArray(inventory.assets)) { add('review', 'HISTORICAL_INVENTORY_SCHEMA', record.file, attempt.line, 'Historical inventory has an unsupported schema; review at its recorded commit.'); continue; }
+        for (const asset of inventory.assets) for (const field of ['source', 'export']) {
+          const ref = asset?.[field];
+          if (typeof ref !== 'string') { add('review', 'HISTORICAL_ASSET_PENDING', record.file, attempt.line, 'Historical inventory has a pending asset path; preserve this gap.'); continue; }
+          const relative = [kitPrefix, ref].filter(Boolean).join('/');
+          if (!safeFile(gitRoot, relative, record.file, attempt.line, false)) continue;
+          if (!attempt.entries.has(relative)) add('error', 'HISTORICAL_INVENTORY_ASSET', record.file, attempt.line, 'Inventory asset is absent from the complete stored attempt: ' + relative + '. Current files are not historical evidence.');
+        }
+      }
       for (const entry of attempt.entries.values()) if (entry.type === 'blob' && entry.mode !== '120000' && entry.name.endsWith('.md')) {
         if (entry.size > 512 * 1024) { add('review', 'HISTORICAL_MARKDOWN_SIZE', record.file, attempt.line, 'Large historical Markdown asset links require manual review.'); continue; }
         const blob = git(['cat-file', 'blob', entry.oid], gitRoot);
@@ -351,6 +376,126 @@ export function checkStoreAssets(input, { store = 'microsoft-store', gitExecutab
     for (const name of working.keys()) if (!stored.has(name)) add(level, 'CANDIDATE_NOT_FROZEN', record.file, attempt.line, 'Candidate contains a file outside this frozen tree: ' + name + '. Check intended untracked/ignored additions.');
   }
 
+  function checkInventories(assetFiles) {
+    const inventories = [], assigned = new Set();
+    const unresolved = input => typeof input === 'string' && /^(?:Unknown|Pending)\b/.test(input);
+    const inventoryFiles = assetFiles.filter(file => path.basename(file) === 'asset-inventory.json');
+    for (const file of inventoryFiles) {
+      const name = slash(path.relative(root, file)), parts = name.split('/'), state = parts[1], scope = parts[2];
+      const issue = (level, code, message) => add(level, code, name, 1, message);
+      if (parts.length !== 4 || (scope !== 'shared' && !localeName(scope))) { issue('error', 'INVENTORY_SCOPE', 'Place inventory at <state>/<locale-or-shared>/asset-inventory.json.'); continue; }
+      const text = read(file); tokens(text, name);
+      let inventory;
+      try { inventory = JSON.parse(text); }
+      catch { issue('error', 'INVENTORY_JSON', 'Restore valid JSON; the inventory was not interpreted.'); continue; }
+      if (!inventory || inventory.schema_version !== 1) { issue('review', 'INVENTORY_SCHEMA', 'Unsupported inventory schema; review manually rather than assuming role checks passed.'); continue; }
+      if (!Array.isArray(inventory.assets)) { issue('error', 'INVENTORY_FIELDS', 'assets must be an array; an explicit empty array can represent removal of the last export.'); continue; }
+      for (const key of ['template_version', 'package_type', 'product_type', 'device_family']) if (typeof inventory[key] !== 'string' || !inventory[key].trim()) issue('error', 'INVENTORY_FIELDS', 'Supply inventory field ' + key + '.');
+      const supported = ['msix', 'msi-exe'].includes(inventory.package_type) && inventory.product_type === 'app' && inventory.device_family === 'Desktop';
+      if (!supported) issue('review', 'ASSET_PROFILE_REVIEW', 'Only verified MSIX/MSI-EXE Desktop application roles receive automatic platform checks; confirm unknown/game/other-device requirements.');
+      const result = { name, state, scope, profile: [inventory.package_type, inventory.product_type, inventory.device_family], assets: [], dependencies: new Set() }, ids = new Set(), exports = new Set();
+      inventories.push(result);
+      for (const asset of inventory.assets) {
+        if (!asset || typeof asset !== 'object' || Array.isArray(asset)) { issue('error', 'INVENTORY_FIELDS', 'Every asset must be an object.'); continue; }
+        const label = typeof asset.id === 'string' ? asset.id : '(missing id)';
+        const finding = (level, code, message) => issue(level, code, label + ': ' + message);
+        if (typeof asset.id !== 'string' || !/^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(asset.id) || ids.has(asset.id)) finding('error', 'ASSET_ID', 'Use a unique lowercase kebab-case id within the inventory.');
+        ids.add(asset.id);
+        for (const key of ['role', 'destination', 'source_provenance', 'format', 'transparency', 'generation_method', 'requirements_source', 'requirements_reviewed']) {
+          if (typeof asset[key] !== 'string' || !asset[key].trim()) finding('error', 'INVENTORY_FIELDS', 'Supply ' + key + ', preserving unknown evidence explicitly.');
+          else if (unresolved(asset[key])) finding('review', 'ASSET_PENDING', key + ' is unresolved; independent Draft preparation may continue.');
+        }
+        if (!Array.isArray(asset.locales) || !asset.locales.length || asset.locales.some(locale => typeof locale !== 'string' || !localeName(locale)) || new Set(asset.locales).size !== asset.locales.length) finding('error', 'ASSET_LOCALES', 'Supply distinct valid consumer locales.');
+        const locales = Array.isArray(asset.locales) ? asset.locales.filter(locale => typeof locale === 'string' && localeName(locale)) : [];
+        if (scope !== 'shared' && locales.some(locale => locale !== scope)) finding('error', 'ASSET_LOCALES', 'Localized exports can target only their owning locale; use shared for deliberate reuse.');
+        result.assets.push({ ...asset, locales });
+        for (const locale of locales) {
+          const key = state + '/' + locale + '/' + asset.role;
+          if (assigned.has(key)) finding('error', 'ASSET_DESTINATION_DUPLICATE', 'More than one export assigns this role to ' + locale + ' in ' + state + '.');
+          assigned.add(key);
+        }
+        const role = LOGO_ROLES[asset.role];
+        if (!role) finding('review', 'ASSET_ROLE_REVIEW', 'This role has no automatic platform rules; verify its destination/requirements explicitly.');
+        else if (supported) {
+          if (role.route !== inventory.package_type) finding('error', 'ASSET_ROLE_PROFILE', 'Role does not match the declared package route.');
+          else if (asset.destination !== role.destination) finding('error', 'ASSET_DESTINATION', 'Use the verified destination: ' + role.destination);
+          if (role.route === 'msi-exe') finding('review', 'ASSET_REQUIREMENTS_REVIEW', 'MSI/EXE numeric dimensions, encoding, file limit and alpha policy require current upload-field evidence; no MSIX dimensions are inferred.');
+        }
+        for (const key of ['width', 'height']) {
+          if (asset[key] === null) finding('review', 'ASSET_PENDING', key + ' is not yet measured.');
+          else if (!Number.isInteger(asset[key]) || asset[key] <= 0) finding('error', 'ASSET_DIMENSIONS', key + ' must be a positive integer or null.');
+        }
+        if (!['present', 'absent', 'Unknown'].includes(asset.transparency)) finding('error', 'ASSET_TRANSPARENCY', 'Use present, absent, or Unknown; pixel alpha/background appearance requires review.');
+        if (asset.requirements_reviewed !== 'Unknown' && !validDate(asset.requirements_reviewed)) finding('error', 'ASSET_REQUIREMENTS_DATE', 'Use a real review date or Unknown.');
+        if (typeof asset.requirements_source === 'string' && !unresolved(asset.requirements_source) && !/^https:\/\//.test(asset.requirements_source)) finding('error', 'ASSET_REQUIREMENTS_SOURCE', 'Use an authoritative HTTPS URL, or explicit Unknown/Pending information.');
+        if (!asset.review || !['pending', 'approved', 'changes-required'].includes(asset.review.visual) || typeof asset.review.evidence !== 'string' || !asset.review.evidence.trim()) finding('error', 'ASSET_REVIEW_FORMAT', 'Supply review.visual and review.evidence.');
+        else {
+          if (asset.review.visual !== 'approved' || unknown(asset.review.evidence)) finding('review', 'ASSET_VISUAL_REVIEW', 'Visual review is pending/needs changes or lacks evidence; technical checks do not approve artwork.');
+          else finding('review', 'ASSET_APPROVAL_EVIDENCE', 'Recorded visual approval still needs human evidence review; this checker cannot authenticate it.');
+        }
+        const paths = {};
+        for (const field of ['source', 'export']) {
+          const ref = asset[field];
+          if (ref === null) { finding('review', 'ASSET_PENDING', field + ' file is pending.'); continue; }
+          if (typeof ref !== 'string') { finding('error', 'INVENTORY_FIELDS', field + ' must be a kit-relative path or null.'); continue; }
+          const target = safeFile(root, ref, name, 1);
+          if (!target) continue;
+          const scopes = field === 'source' ? [...new Set([scope, 'shared'])] : [scope];
+          if (!scopes.some(owner => ref.startsWith(store + '/' + state + '/' + owner + '/logos/' + (field === 'source' ? 'source' : 'export') + '/'))) { finding('error', 'ASSET_PATH_SCOPE', field + ' must stay in its owning state/scope and logos/source or logos/export directory.'); continue; }
+          result.dependencies.add(ref);
+          if (field === 'export') {
+            if (exports.has(ref)) finding('error', 'ASSET_EXPORT_DUPLICATE', 'An export appears more than once; list its consumers in one row.');
+            exports.add(ref);
+          }
+          if (!fs.existsSync(target) || !fs.statSync(target).isFile()) finding('error', 'ASSET_FILE_MISSING', field + ' file is missing: ' + ref);
+          else paths[field] = target;
+        }
+        if (paths.export) {
+          const stat = fs.statSync(paths.export), header = Buffer.alloc(33), fd = fs.openSync(paths.export, 'r');
+          let length;
+          try { length = fs.readSync(fd, header, 0, header.length, 0); } finally { fs.closeSync(fd); }
+          const png = length === 33 && header.subarray(0, 8).equals(Buffer.from([137, 80, 78, 71, 13, 10, 26, 10])) && header.readUInt32BE(8) === 13 && header.toString('ascii', 12, 16) === 'IHDR';
+          if (asset.format !== 'Unknown' && asset.format !== path.extname(paths.export).slice(1).toLowerCase()) finding('error', 'ASSET_FORMAT', 'Declared format differs from export extension.');
+          if (asset.format === 'png' && !png) finding('error', 'ASSET_PNG_HEADER', 'Export has no readable PNG IHDR; restore the actual image. Full image decoding remains a separate review.');
+          if (png && ((asset.width !== null && asset.width !== header.readUInt32BE(16)) || (asset.height !== null && asset.height !== header.readUInt32BE(20)))) finding('error', 'ASSET_DIMENSIONS', 'Declared dimensions disagree with the PNG header.');
+          if (supported && role?.route === inventory.package_type && asset.role === 'msix-app-tile' && (!png || asset.format !== 'png' || header.readUInt32BE(16) !== 300 || header.readUInt32BE(20) !== 300 || stat.size > 50_000_000)) finding('error', 'ASSET_MSIX_TILE', 'MSIX app tile must be a 300 x 300 PNG, at most 50,000,000 bytes under the documented conservative ceiling.');
+        }
+        if (supported && role?.route === inventory.package_type && Number.isInteger(asset.width) && Number.isInteger(asset.height) && asset.width * role.ratio[1] !== asset.height * role.ratio[0]) finding('error', 'ASSET_ASPECT_RATIO', 'Declared dimensions do not match the named upload role aspect ratio.');
+      }
+      for (const exportFile of assetFiles.filter(file => slash(path.relative(root, file)).startsWith(store + '/' + state + '/' + scope + '/logos/export/'))) if (!exports.has(slash(path.relative(root, exportFile)))) issue('error', 'ASSET_EXPORT_UNLISTED', 'Export has no inventory consumer: ' + slash(path.relative(root, exportFile)));
+    }
+    for (const file of assetFiles) {
+      const name = slash(path.relative(root, file)), parts = name.split('/');
+      if (parts.includes('logos') && !inventoryFiles.some(inventory => slash(path.relative(root, inventory)) === parts.slice(0, 3).join('/') + '/asset-inventory.json')) add('review', 'ASSET_INVENTORY_MISSING', name, 1, 'Legacy/unmapped Logo file: inspect its source, role and destination before adding an inventory; no migration was performed.');
+    }
+    function digest(file) {
+      const hash = crypto.createHash('sha256'), buffer = Buffer.alloc(65536), fd = fs.openSync(file, 'r');
+      try { let count; while ((count = fs.readSync(fd, buffer, 0, buffer.length, null))) hash.update(buffer.subarray(0, count)); }
+      finally { fs.closeSync(fd); }
+      return hash.digest('hex');
+    }
+    // A complete shared candidate retains exports for unaffected languages too.
+    // Only changed/removed rows and files extend this submission's locale scope.
+    for (const inventory of inventories.filter(item => item.state === 'release-prep' && item.scope === 'shared')) {
+      const live = inventories.find(item => item.state === 'current' && item.scope === 'shared');
+      inventory.changedLocales = new Set();
+      const normalized = (owner, asset) => JSON.stringify([owner.profile, ...['role', 'destination', 'locales', 'source', 'export', 'width', 'height', 'format', 'transparency'].map(key =>
+        typeof asset[key] === 'string' && ['source', 'export'].includes(key) ? asset[key].replace('/current/', '/release-prep/') : asset[key])]);
+      const sameFiles = (asset, old) => ['source', 'export'].every(key => {
+        if (!inventory.dependencies.has(asset[key]) || !live?.dependencies.has(old[key])) return false;
+        const left = path.join(root, asset[key]), right = path.join(root, old[key]);
+        return fs.existsSync(left) && fs.existsSync(right) && fs.statSync(left).isFile() && fs.statSync(right).isFile() &&
+          fs.statSync(left).size === fs.statSync(right).size && digest(left) === digest(right);
+      });
+      for (const asset of inventory.assets) {
+        const old = live?.assets.find(item => item.id === asset.id);
+        if (!old || normalized(inventory, asset) !== normalized(live, old) || !sameFiles(asset, old)) for (const locale of [...asset.locales, ...(old?.locales || [])]) inventory.changedLocales.add(locale);
+      }
+      for (const old of live?.assets || []) if (!inventory.assets.some(asset => asset.id === old.id)) for (const locale of old.locales) inventory.changedLocales.add(locale);
+    }
+    return inventories;
+  }
+
   try {
     if (store !== 'microsoft-store') { fail('UNSUPPORTED_STORE', '.', 'Only the microsoft-store adapter is implemented. Reserved adapters are not checked.'); }
     else if (!input || !fs.existsSync(input) || !fs.statSync(input).isDirectory()) fail('INPUT_ROOT', '.', 'Pass --root pointing to the copied store-assets/ directory.');
@@ -362,6 +507,7 @@ export function checkStoreAssets(input, { store = 'microsoft-store', gitExecutab
         for (const area of ['current', 'release-prep', 'submissions', 'templates']) if (!fs.existsSync(path.join(root, store, area))) add('error', 'STORE_DIRECTORY', store + '/' + area, 1, 'Restore the required store directory.');
         const workingFiles = files(path.join(root, store, 'release-prep'));
         const currentFiles = files(path.join(root, store, 'current'));
+        const inventories = checkInventories([...workingFiles, ...currentFiles]);
         const recordFiles = files(path.join(root, store, 'submissions')).filter(file => file.endsWith('.md'));
         const rulebooks = fs.readdirSync(root).filter(name => name.endsWith('-store-assets.md'));
         if (!rulebooks.length) add(workingFiles.length || recordFiles.length ? 'error' : 'info', 'RULEBOOK_MISSING', '.', 1, 'Initialize or restore the product rulebook before store work. An unused kit needs no generated rulebook yet.');
@@ -435,13 +581,19 @@ export function checkStoreAssets(input, { store = 'microsoft-store', gitExecutab
           }
           for (const ref of record.refs) {
             const candidateLocale = ref.value.startsWith(store + '/release-prep/') ? ref.value.split('/')[2] : '';
-            if (localeName(candidateLocale) && !record.locales.includes(candidateLocale)) {
+            if (candidateLocale !== 'shared' && localeName(candidateLocale) && !record.locales.includes(candidateLocale)) {
               const looksLocalized = candidateLocale.includes('-') || ['listing.md', 'release-notes.md'].some(name => fs.existsSync(path.join(root, store, 'release-prep', candidateLocale, name)));
               add(looksLocalized ? 'error' : 'review', 'LOCALE_SCOPE', record.file, ref.line, 'Candidate root is absent from Locales or needs explicit shared-asset scope review: ' + candidateLocale);
             }
           }
           compareCandidate(record, workingFiles.filter(file => record.locales.includes(slash(path.relative(path.join(root, store, 'release-prep'), file)).split('/')[0]) ||
             record.refs.some(ref => slash(path.relative(root, file)).startsWith(ref.value.replace(/\/$/, '') + '/') || slash(path.relative(root, file)) === ref.value)));
+          for (const inventory of inventories.filter(item => item.state === 'release-prep' && (record.locales.includes(item.scope) || record.refs.some(ref => item.name === ref.value || item.name.startsWith(ref.value.replace(/\/$/, '') + '/'))))) {
+            const consumers = inventory.scope === 'shared' ? [...inventory.changedLocales || []] : inventory.assets.flatMap(asset => asset.locales);
+            if (consumers.some(locale => !record.locales.includes(locale))) add('error', 'ASSET_RECORD_LOCALES', record.file, 1, 'Record Locales must include every consumer of changed/removed shared exports from ' + inventory.name + '.');
+            for (const dependency of inventory.dependencies) if (!record.refs.some(ref => dependency === ref.value || dependency.startsWith(ref.value.replace(/\/$/, '') + '/'))) add('error', 'ASSET_RECORD_SCOPE', record.file, 1, 'Submitted files must cover inventory sources/exports, including the complete shared tree when used: ' + dependency);
+            if ([...inventory.dependencies].some(dependency => dependency.startsWith(store + '/release-prep/shared/')) && !record.refs.some(ref => ref.value === store + '/release-prep/shared' || (store + '/release-prep/shared').startsWith(ref.value.replace(/\/$/, '') + '/'))) add('error', 'ASSET_RECORD_SHARED_SCOPE', record.file, 1, 'Reference the complete shared tree in Submitted files, not only individual shared source/export files.');
+          }
         }
         if (!workingFiles.length && !records.length) add('info', 'NO_SUBMISSION', store, 1, 'No candidate content or submission records; empty directories/.gitkeep are not orphan candidates.');
       }

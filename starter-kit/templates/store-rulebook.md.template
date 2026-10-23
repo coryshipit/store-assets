@@ -1,5 +1,5 @@
 ---
-template_version: 1.4.0
+template_version: 1.5.0
 ---
 
 # {{PRODUCT_NAME}} Store Assets — Rules
@@ -37,14 +37,16 @@ store-assets/
 │   └── store-rulebook.md.template
 ├── examples/
 │   ├── update-tasks.md            # fictional task and field examples; not live records
-│   └── submission-history.md      # snapshot, resubmission, and time examples
+│   ├── submission-history.md      # snapshot, resubmission, and time examples
+│   └── logo-assets.md             # sourced listing Logo consumers and ownership
 ├── scripts/
 │   └── check-store-assets.mjs      # optional single-file Node.js checker; no dependencies
 ├── {{STORE_PLATFORM}}/
+│   ├── asset-rules.md             # Microsoft-specific listing Logo roles and inventory rules
 │   ├── current/                  # live published assets, per locale
 │   ├── release-prep/             # draft assets, per locale
 │   ├── submissions/              # one record file per submission
-│   └── templates/                # store-specific record template sources
+│   └── templates/                # includes Microsoft asset-inventory.json.template
 ├── apple-app-store/              # reserved skeleton, future Adapter
 │   ├── current/
 │   ├── release-prep/
@@ -57,7 +59,7 @@ store-assets/
     └── templates/
 ```
 
-The layout is identical across store adapters by design; the lifecycle is shared, but each adapter keeps its own fields, templates, and validation rules. `apple-app-store/` and `google-play/` exist as **empty reserved skeletons** only — no rules for them are assumed until researched and verified.
+The lifecycle directories are shared across store adapters; each adapter keeps its own fields, templates, and validation rules. Microsoft-specific asset rules and inventory templates apply only to `microsoft-store`. `apple-app-store/` and `google-play/` exist as **empty reserved skeletons** only — no rules for them are assumed until researched and verified.
 
 `current/`, `release-prep/`, and `submissions/` are created by first initialization; locale subfolders are created when a locale is actually used.
 
@@ -104,6 +106,14 @@ release-prep/<locale>/
 - Use the same tree whether the update is a new build or only listing metadata and screenshots.
 - For a listing-only update, preserve the confirmed application version and unrelated assets/release notes. Record the asset changes in the submission, without inventing an application release.
 
+### Microsoft Store Logo ownership
+
+For new/revised Logos, follow `microsoft-store/asset-rules.md` and `examples/logo-assets.md` at kit root. Add `asset-inventory.json` plus `logos/source/` and `logos/export/` under the affected locale or `shared/` in each state as needed. The Microsoft template is `microsoft-store/templates/asset-inventory.json.template`; it keeps unknown inputs explicit until resolved.
+
+The inventory binds each export to its source, role, language consumers, actual destination, dimensions/format, transparency declaration, generation method, requirements source/date, and visual review evidence. A shared repository file still has language-specific upload consumers. Preserve screenshot source/export conventions. Package icons remain application-project evidence, distinct from listing uploads.
+
+An affected shared tree is a complete candidate scope alongside the complete affected locale trees. Include it in Submitted files and every corresponding frozen attempt. Preserve unchanged shared consumers. On promotion, rebase only inventory `source`/`export` path prefixes from `release-prep/` to `current/`; the approved image/source bytes and original historical references stay intact. Existing projects without inventories require deliberate review and no automatic migration.
+
 ### `submissions/`
 
 One record file per submission:
@@ -123,7 +133,7 @@ The same record also holds numbered submission attempts and sourced events. Pres
 Two template locations, kept apart on purpose:
 
 - `templates/` (package level) — the template source that generates this rulebook. The package `README.md` is static, not generated.
-- `<STORE_PLATFORM>/templates/` — reserved for store-specific record templates in a later phase. Until then, the file skeletons in §6 are the required source for listing, release-notes, and submission-record formats.
+- `<STORE_PLATFORM>/templates/` — store-specific templates; Microsoft ships an asset inventory template. The file skeletons in §6 remain the required source for listing, release-notes, and submission-record formats.
 
 Use the §6 file skeletons instead of inventing a new structure.
 
@@ -143,6 +153,8 @@ Use the §6 file skeletons instead of inventing a new structure.
   ```
 
   Editable files go in `<state>/<locale>/screenshots/source/`; upload-ready files in `<state>/<locale>/screenshots/export/`, where `<state>` is `current` or `release-prep`.
+
+- Listing Logo source/export files use semantic lowercase kebab-case names in the inventory's owned `logos/source/` and `logos/export/` directories. Generate only derivatives with confirmed consumers; do not infer a size matrix from Windows package icons.
 
 ## 6. Required file contents
 
@@ -330,6 +342,9 @@ A release preparation is ready only when:
 - [ ] Keywords are relevant, not over-repeated.
 - [ ] Release notes present when required; a listing-only update preserves existing application release notes without inventing a new release.
 - [ ] Screenshots are final and upload-ready.
+- [ ] New/revised Logos have a complete inventory, verified package/product/device applicability, source provenance, named upload fields and language consumers, and reviewed source/export files; unresolved legacy Logo mappings remain visible gaps.
+- [ ] Logo technical checks and visual approval are reviewed separately. PNG headers do not prove alpha/background appearance, upload success, or that a live rendering problem is resolved.
+- [ ] Shared sources/exports and their inventories are included in complete candidate/snapshot scopes; all consumers of changed shared exports are in the record's Locales.
 - [ ] Screenshot order is confirmed.
 - [ ] Filenames follow the naming rules in §5.
 - [ ] No unsupported feature is advertised.

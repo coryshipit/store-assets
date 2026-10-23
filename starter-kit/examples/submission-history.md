@@ -6,6 +6,8 @@ These fictional Northstar Notes examples explain immutable asset references and 
 
 After a complete `en-US` Logo candidate is approved:
 
+For a new/revised listing Logo, the locale tree includes its owned inventory/source/export files under the [asset rules](../microsoft-store/asset-rules.md). If the candidate uses shared sources/exports, include the complete `shared/` scope alongside the locale in every step below; see [the shared Logo example](logo-assets.md). The historical examples here do not define an upload size or a package-icon role.
+
 1. Commit the approved `store-assets/microsoft-store/release-prep/en-US/` tree under the application's normal Git rules. Keep unrelated work out of that commit. The submission record can remain uncommitted at this point.
 2. Resolve the resulting full commit ID and verify the stored tree and candidate match, including checks for untracked/ignored files. For an existing matching commit, reuse its resolved ID; do not require a new commit just to change a date or record note.
 3. Write the ID, root-relative tree path, approval source, verification result, and actual verification time into Attempt 1. Add the record in a later commit if desired. The asset commit does not need to contain its own referencing record.
