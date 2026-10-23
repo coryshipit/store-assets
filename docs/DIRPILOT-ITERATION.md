@@ -4,7 +4,7 @@ Date: 2026-10-22
 
 Branch: `iteration/dirpilot-feedback`
 
-Status: plan accepted on 2026-10-22; I.1-I.6 rules/tools/scenarios implemented; independent workflow-agent acceptance remains pending
+Status: plan accepted on 2026-10-22; I.1-I.6 implemented; ten selected independent scenarios passed on 2026-10-23; ready for merge review
 
 ## 1. Purpose and evidence
 
@@ -154,7 +154,7 @@ Development work:
 
 Expected paths: kit workflow/README/rulebook as applicable, `docs/QA.md`, `docs/ROADMAP.md`, and reusable scenario inputs/expected invariants.
 
-Implementation decision (2026-10-23): workflow §§1.3–1.4 establishes selected-store ownership/archive state from saved files before writes, scopes read-only checks and task facts, and separates independent preparation from dependent actions needing evidence. Workflow §5 keeps continuation in existing fields/Open items/Review notes or the current provenance entry, with a concise derived final report; read-only tasks add no notes or parallel dashboard. Interface-language mappings retain observation source/date and canonical field/inventory references without changing customer locales or copying canonical text. Rulebook template `1.7.0`, the kit session example, and ten versioned scenario tasks/invariants ship together. QA explicitly evaluates the `testing/qa-strategy` proposal, selects focused independent scenarios, distinguishes all evidence types, and clarifies staged versus retry cleanup and actual downloaded release evidence. Constructed handoff/upgrade/checker checks passed; the ten independent scenarios have not been executed, so I.6 behavioral acceptance and overall merge-readiness evidence remain pending.
+Implementation decision (2026-10-23): workflow §§1.3–1.4 establishes selected-store ownership/archive state from saved files before writes, scopes read-only checks and task facts, and separates independent preparation from dependent actions needing evidence. Workflow §5 keeps continuation in existing fields/Open items/Review notes or the current provenance entry, with a concise derived final report; read-only tasks add no notes or parallel dashboard. Interface-language mappings retain observation source/date and canonical field/inventory references without changing customer locales or copying canonical text. Rulebook template `1.7.0`, the kit session example, and ten versioned scenario tasks/invariants ship together. QA explicitly evaluates the `testing/qa-strategy` proposal, selects focused independent scenarios, distinguishes all evidence types, and clarifies staged versus retry cleanup and actual downloaded release evidence. Constructed handoff/upgrade/checker checks passed. Subsequent independent execution of the ten selected scenarios also passed; scope and observed invariants are recorded below.
 
 Acceptance:
 
@@ -182,19 +182,42 @@ This is a repository behavior simulation, not a real store publication. The P0 f
 
 For each stage, review the spec/template diff, applicable checks, remaining uncertainties, and compatibility implications before proceeding. Bump `template_version` whenever the template changes. Keep reusable specifications and fixtures in Git; keep per-run logs out of the repository. A later release additionally needs package checks, versioned release notes, and verification of the actual downloaded artifact.
 
+### Independent scenario review (2026-10-23)
+
+Tested source: `b5cfaa2913003ce0728ab4bcabbb3c70d7c4b9eb`, rulebook template `1.7.0`, inventory template `1.0.0`, provenance schema `1`. The work package remained unchanged during verification. Each scenario used a separate disposable project and a native actor started with no inherited conversation (`fork_turns: none`), given only its task and permitted fictional project/incoming files. Actors did not receive expected invariants, observer metadata or development conversation. Runtime: Node.js `24.18.0`, Git `2.54.0.windows.1` on Windows.
+
+The repository-only [preparation/review helper](../tests/exercises/independent-scenarios.mjs) builds inputs from the [versioned matrix](../tests/fixtures/session-handoff/scenarios.json), records pre-action path/SHA-256 inventories outside the actor project, and reports changes and copied-checker findings. The reviewer assessed produced files, canonical references, raw Git objects and source/time semantics in addition to actor reports. The helper does not launch actors or assign PASS automatically.
+
+| Scenario | Result | Observed evidence |
+| --- | --- | --- |
+| `orphan-ambiguous` | PASS | No project changes; missing ownership/identity reported without an invented Draft. Checker exit `1` correctly exposes the seeded orphan. |
+| `orphan-confirmed` | PASS | Only one owning Draft added; current/candidate/history bytes retained, version stays `1.0.0`, package fields not applicable, original creation time unknown. |
+| `initialize-existing` | PASS | Only the correctly resolved product rulebook added; exact resolved-template comparison passed; baseline/provenance unchanged. |
+| `interface-language` | PASS | Only existing Open items/Review notes changed; canonical description referenced without duplication, customer locale remains `en-US`, unobserved `zh-CN` field labels pending. |
+| `submitted-no-confirmation` | PASS | No project changes; Submitted state, pending snapshot and absent go-live evidence preserved; no promotion or guessed events. |
+| `listing-only` | PASS | Modern MSIX Desktop Logo candidate/inventory plus one Draft; supplied source/export bytes match, unrelated copy/release notes and current retained, visual/upload evidence pending. |
+| `package-pending` | PASS | Candidate copy adds only the supplied title-sorting capability; Draft targets product `1.1.0`, exact package version/artifact/QA remain pending, current unchanged. |
+| `review-fix` | PASS | Same record reopened Draft; only authorized Logo replacement/removal applied, original attempt/events/times retained and removed historical asset still retrievable. |
+| `confirmed-promotion` | PASS | Three promoted files match the full original Git snapshot byte-for-byte, obsolete live asset and completed prep removed; original references and unknown submission/platform times retained. |
+| `adapted-upgrade` | PASS | All 16 application-state file hashes and incoming copy unchanged; local extension/review rule/marker/generation evidence retained, unknown origin preserved, completed per-path merge recorded. |
+
+All ten actors completed on their first execution: no actor retries, repaired outputs, FAIL or INCONCLUSIVE results. A reviewer comparison initially used the wrong pattern for the retained generation footer; correcting that assertion verified the original actor output without changing it or rerunning the scenario. All final copied-checker exits were `0` except the deliberately invalid ambiguous-orphan input. Remaining review findings were retained; scenario PASS does not mean submission readiness.
+
+This is one execution set on the available native executor, not a reliability or cross-model study. Controlled project/incoming inventories do not establish global executor cache/log isolation. Shared-inventory promotion, repeat-publication history, other package/device variants and blocked-then-resumed upgrade variants retain their separate deterministic/artifact evidence; they were not additionally exercised by these actors. No real store upload, live-page observation, GitHub workflow run or downloaded release-asset verification occurred. Execution copies and per-run artifacts are disposable; only reusable inputs/helpers and this milestone conclusion belong in Git.
+
 ## 6. Decisions to settle during implementation
 
 | Decision | Recommended starting position | Settle before |
 | --- | --- | --- |
 | First submission | Retain updates-only scope; consider separately | Any scope expansion |
 | Record format and legacy fields | Implemented in template 1.4.0: readable attempt/event sections, explicit checkable path/status-note conventions, distinct date meanings and deliberate legacy handling | I.3 parser/tests implemented; custom/legacy gaps remain review findings |
-| Snapshot timing and resubmission references | Implemented in I.2: approved full candidate commit precedes its record reference; retain every attempt, reverify before promotion, expose unavailable history | Independent behavior verification pending |
+| Snapshot timing and resubmission references | Implemented in I.2: approved full candidate commit precedes its record reference; retain every attempt, reverify before promotion, expose unavailable history | Selected independent review-fix/promotion scenarios passed; repeat-publication variants retain artifact evidence |
 | Checker runtime and format | Delivered: one optional Node.js 22+ standard-library module, explicit root/store, text/JSON findings, exit 0/1/2, no writes or network retrieval | I.3 runtime decision settled; standalone tests passed on Node.js 24 / Git for Windows |
-| Asset inventory location and shared assets | Implemented in I.4: Microsoft-specific per-locale/shared JSON inventories with owned Logo source/export directories, named language consumers, complete shared snapshots, and path-only rebasing; screenshot conventions retained | Deterministic/standalone checks passed; independent behavior verification pending |
-| Provenance storage | Implemented in I.5: kit-root provenance JSON, manual compare/merge guide, retained unknown origin/adaptations/history, staging-only release identity stamping | Artifact/stamping and standalone checks passed; independent behavior verification pending |
+| Asset inventory location and shared assets | Implemented in I.4: Microsoft-specific per-locale/shared JSON inventories with owned Logo source/export directories, named language consumers, complete shared snapshots, and path-only rebasing; screenshot conventions retained | Deterministic/standalone checks and independent localized MSIX Logo preparation passed; shared variants retain deterministic evidence |
+| Provenance storage | Implemented in I.5: kit-root provenance JSON, manual compare/merge guide, retained unknown origin/adaptations/history, staging-only release identity stamping | Artifact/stamping, standalone and independent adapted-upgrade checks passed |
 | Test strategy and release gate | Focused deterministic and agent evidence; explicit handling of inconclusive runs | First behavioral change; release review |
 
-I.6 settled the focused policy/scenario alignment in `docs/QA.md`; it does not complete the broader Task G experiment or supply a release exception. Independent execution cost/reliability and the remaining behavior acceptance require observed results.
+I.6 settled the focused policy/scenario alignment in `docs/QA.md` and now has the selected independent execution evidence above. Broader Task G cost/reliability and release-gate evaluation remain open; this first execution set supplies no release exception.
 
 ## 7. Completion and follow-up
 
@@ -202,4 +225,4 @@ Each stage is complete only when its user-facing rules ship inside the standalon
 
 The iteration is ready for merge review when all selected stages have their acceptance evidence, compatibility guidance, and a coherent package layout. Tagging, publishing, pushing, and merging are separate actions and are not part of this planning task. Existing roadmap Tasks D and H remain separate unless later selected explicitly. Task G is updated only for work actually completed.
 
-Current review boundary: I.1-I.6 implementation is available, but constructed artifacts and checker tests do not complete the independent-agent acceptance criteria. Run the affected versioned scenarios independently before claiming those criteria passed. No merge/release readiness or exception is inferred from completing the implementation stages.
+Current review boundary: I.1-I.6 implementation, applicable deterministic/artifact checks and ten selected independent scenarios provide evidence for merge review. The branch has not been merged. Additional executor/variant coverage and actual release workflow/download evidence remain separate work; no release readiness or exception is inferred.

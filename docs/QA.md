@@ -38,6 +38,8 @@ Reusable facts, prompts, input states, and expected invariants belong under `tes
 
 [Session scenarios](../tests/fixtures/session-handoff/README.md) cover I.6 startup, missing facts, record-based handoff and interface/customer language separation. `node tests/exercises/session-handoff.mjs` constructs orphan/recovered/submitted artifacts and checks saved handoff references with the copied checker. These are artifact/parser checks, not a test that an independent agent follows the instructions. The scenario file also maps initialization, listing-only, package, review-fix, promotion and upgrade tasks to their versioned inputs and expected invariants.
 
+For independent execution, `tests/exercises/independent-scenarios.mjs prepare <scenario-id>` creates a fresh actor project and observer-only baseline outside it. Launch the actor separately without inherited development conversation; give it only its task and permitted fixture paths. `review <run-path>` reports file differences, saved records and copied-checker findings for human assessment, not an automatic behavior verdict. Check source/template identity, selected input variant, allowed writes, original event/snapshot evidence and semantic claims before recording an outcome; then `cleanup <run-path>` removes only the verified disposable root. The helper never launches an agent or writes this repository's Git history. A one-pass set of scenarios measures those tasks on the chosen executor; it does not establish cross-model reliability or actual store behavior.
+
 ### Focused strategy review (2026-10-23, Task I.6)
 
 The `testing/qa-strategy` branch at `4e8b410850d426b8035cb0714687a4fc33487672` was inspected as design input: it changes `docs/ROADMAP.md` and adds `docs/TESTING-STRATEGY.md`. Its proposal is not merged. This file remains the QA policy; the following decisions apply to this iteration:
@@ -51,7 +53,7 @@ The `testing/qa-strategy` branch at `4e8b410850d426b8035cb0714687a4fc33487672` w
 | Allow deterministic/download checks to waive agent gaps | No implicit waiver: the release review still needs an explicit maintainer decision for omitted applicable behavior or unresolved INCONCLUSIVE evidence |
 | Promote a complex harness or all proposed future automation into current scope | Defer; current small checkers/artifact exercises and portable scenarios provide the available evidence |
 
-This completes the focused policy/scenario alignment for I.6; broader Task G evaluation remains open until independent execution and release-gate costs/reliability have actual evidence. A prepared scenario is not an executed scenario.
+This completes the focused policy/scenario alignment for I.6. The first independent execution set is recorded in [the iteration review](DIRPILOT-ITERATION.md#independent-scenario-review-2026-10-23); broader Task G evaluation of repeated execution, costs/reliability and release gates remains open. A prepared scenario is not an executed scenario.
 
 For each evidence item use `PASS`, `FAIL`, or `INCONCLUSIVE`. Record a scenario that was not attempted as `not run`, with the reason; do not call it PASS or INCONCLUSIVE. Silence, timeout, or a tool failure is INCONCLUSIVE only when the available artifacts cannot decide the result. Retry an inconclusive scenario at most once, then report the evidence and limitation without assuming a harness or product cause.
 
