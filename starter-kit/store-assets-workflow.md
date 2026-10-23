@@ -14,7 +14,8 @@ There are two entry points, and they read different files: **first setup (initia
 
 1. This document (process).
 2. `templates/store-rulebook.md.template` — the source of structure and rules until the rulebook exists.
-3. Verifiable facts in the application project: PRD, release notes, QA results, and approved screenshots.
+3. `provenance.json` — retain the incoming source evidence; if absent in an older kit, establish unknown provenance as described in `upgrading.md` without guessing a release from local markers.
+4. Verifiable facts in the application project: PRD, release notes, QA results, and approved screenshots.
 
 Then identifies:
 
@@ -37,6 +38,8 @@ Then generates the rulebook (§3). No other store work happens before the rulebo
 3. The file skeletons in the rulebook; they are the Phase 1 source for listing, release-notes, and submission-record formats.
 4. Existing files under the selected store adapter's `current/`, `release-prep/`, and `submissions/` directories that the task touches.
 5. Verifiable facts in the application project: PRD, release notes, QA results, and approved screenshots.
+
+Read existing `provenance.json` and relevant local adaptations when rules/toolkit differences affect the task. For an upgrade task, follow [upgrading.md](upgrading.md) before replacing toolkit files or merging generated rules. An upgrade preserves all store current/candidate/history files; report separately needed migrations without applying them as part of the toolkit upgrade.
 
 Then identifies:
 
@@ -135,6 +138,8 @@ The submission record is the source for its attempts and event history (rulebook
 
 Templates carry a `template_version` marker. When a template changes, its version is bumped. A generated document records the template and template version it was produced from, so a later session can detect drift.
 
+The installed `provenance.json` records upstream source evidence and upstream template versions separately from local adaptations and generated-document markers. No local marker identifies a downloaded toolkit release by itself. Merge changes into existing rules using `upgrading.md`; a drift finding is a prompt to compare, not permission to overwrite or relabel customized rules.
+
 `{{TEMPLATE_VERSION}}` resolves to the `template_version` value of the template being generated from.
 
 ## 3. Generate the project documents
@@ -151,7 +156,7 @@ Steps:
 
 1. Read the template.
 2. Resolve every `{{...}}` placeholder using the variables above.
-3. Write the result to the target path.
+3. Write the result to a previously absent target path. If the generated rulebook already exists, read and preserve it; use the manual compare/merge procedure for an update. A separately generated review copy is comparison input, never a replacement instruction.
 4. A generated document must never ship with unresolved placeholders, **except** per-submission tokens (`{{LOCALE}}`, `{{SUBMISSION_ID}}`, `{{APPLICATION_VERSION}}`, `{{PUBLICATION_DATE}}`, `{{STATUS}}`) that appear inside the rulebook's **examples and file skeletons** — the rulebook declares these as intentional literal placeholders (see rulebook §1). Examples are illustrations of file shape, not values to resolve.
 
 Per-submission parameters have no value until a submission begins, so the rulebook carries them only in example form.

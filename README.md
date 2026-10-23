@@ -23,6 +23,8 @@ The optional [read-only checker](starter-kit/checking.md) catches missing Draft 
 
 Microsoft Store Logo preparation includes a [sourced role mapping and inventory](starter-kit/microsoft-store/asset-rules.md): trace each export to its source and listing-language upload fields, distinguish MSIX from MSI/EXE requirements, and keep visual review separate from structural checks. See the [fictional Logo update](starter-kit/examples/logo-assets.md).
 
+Installed kits support [manual compare-and-merge upgrades](starter-kit/upgrading.md), with one provenance record for upstream source, local adaptations and upgrade history. Preserve customized rules, active candidates and historical assets; an unverified original download remains unknown.
+
 `starter-kit/` is the copyable work package for users; the root `AGENTS.md` governs development of Store Assets itself and should not be copied into user projects.
 
 ## 🗂️ Documentation

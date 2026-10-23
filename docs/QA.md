@@ -34,6 +34,8 @@ Reusable facts, prompts, input states, and expected invariants belong under `tes
 
 [Logo scenarios](../tests/fixtures/logo-assets/README.md) extend that suite for I.4: verified package-route roles, source/export/consumer mapping, PNG header checks, pending visual evidence, complete shared snapshots, and promotion path rebasing. Synthetic images are generated only in disposable execution copies. These implementation/artifact checks do not constitute fresh-agent behavior or live Store rendering evidence.
 
+[Manual-upgrade scenarios](../tests/fixtures/manual-upgrade/README.md) cover I.5. Run `node tests/exercises/manual-upgrade.mjs` after changing provenance, upgrade ownership/merge rules, or release identity stamping. The constructed exercise preserves a prior-format local extension and active Draft, records a blocked/resumed upgrade with unknown original identity, and executes the actual stamping code extracted from the release workflow in a disposable staging copy. It is not an automatic updater or independent agent verification.
+
 For each evidence item use `PASS`, `FAIL`, or `INCONCLUSIVE`. Record a scenario that was not attempted as `not run`, with the reason; do not call it PASS or INCONCLUSIVE. Silence, timeout, or a tool failure is INCONCLUSIVE only when the available artifacts cannot decide the result. Retry an inconclusive scenario at most once, then report the evidence and limitation without assuming a harness or product cause.
 
 For development review, report passed checks and remaining behavioral coverage separately. Before release, any omitted applicable behavioral scenario or unresolved inconclusive result requires an explicit maintainer decision recorded in the release/task notes. This iteration is not a release exception.
@@ -53,6 +55,7 @@ Static, per-file checks. Do not modify any file to pass a check — fix the kit,
   - a static `README.md` at kit root
   - `templates/store-rulebook.md.template` at package level
   - `checking.md` and `scripts/check-store-assets.mjs` shipped together
+  - `upgrading.md`, `provenance.json`, and `examples/manual-upgrade.md` ship together; source defaults and template markers agree
   - `microsoft-store/{current, release-prep, submissions, templates}/` present
   - `microsoft-store/asset-rules.md`, its versioned JSON inventory template, and `examples/logo-assets.md` ship together
   - `apple-app-store/` and `google-play/` present as empty reserved skeletons (each with `current`, `release-prep`, `submissions`, `templates`)
@@ -68,6 +71,7 @@ Static, per-file checks. Do not modify any file to pass a check — fix the kit,
 - [ ] **Time semantics**: actual submission/platform dates, go-live receipt dates, and event observation/recording times are distinct. Published status is compatible with an unknown platform date; legacy dates are not silently reinterpreted.
 - [ ] **Checker delivery**: the copied CLI runs without repository-only imports/npm dependencies; no files, Git index/config/objects, or submission facts are changed. Test errors/review/incomplete outcomes independently; exit 0 is not a readiness assertion.
 - [ ] **Logo roles**: technical assertions have official sources/review dates and package/product/device applicability. Each example export has a source and real upload consumer; no universal package-icon size matrix or invented MSI/EXE pixel requirement is imposed. Shared consumers and complete candidate/frozen scopes are explicit; promotion changes inventory path prefixes only. Technical, visual, upload, and live-page evidence remain distinct.
+- [ ] **Upgrade safety**: installed provenance retains unknown origin and local adaptations/history. Manual comparisons classify shipped/generated/application-owned paths and preserve all current/candidate/submission bytes and immutable references. Existing rulebooks are merged without blanket regeneration. Release stamping mutates only the staging provenance, records the actual tag/source commit and verifies upstream template markers; it never includes installed-project history.
 
 ## Dry-run behavior check
 

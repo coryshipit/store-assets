@@ -1,0 +1,15 @@
+{
+  "schema_version": 1,
+  "upstream": {
+    "repository": "https://github.com/coryshipit/store-assets",
+    "release": "Unknown",
+    "commit": "Unknown",
+    "template_versions": {
+      "templates/store-rulebook.md.template": "1.6.0",
+      "microsoft-store/templates/asset-inventory.json.template": "1.0.0"
+    },
+    "evidence": "Source-kit defaults; release/commit are not recorded here. A release build stamps its copied provenance file."
+  },
+  "local_adaptations": [],
+  "upgrade_history": []
+}

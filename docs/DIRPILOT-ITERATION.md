@@ -4,7 +4,7 @@ Date: 2026-10-22
 
 Branch: `iteration/dirpilot-feedback`
 
-Status: plan accepted on 2026-10-22; I.1/I.2 rules/examples, I.3 checker, and I.4 Logo inventory/mapping implemented; independent workflow-agent verification remains pending
+Status: plan accepted on 2026-10-22; I.1-I.5 implemented through provenance/manual upgrades; independent workflow-agent verification remains pending
 
 ## 1. Purpose and evidence
 
@@ -134,6 +134,8 @@ Development work:
 
 Expected paths: kit README/workflow, rulebook template, a small provenance format if needed, repository distribution/release guidance, and upgrade fixtures. No automatic updater.
 
+Implementation decision (2026-10-23): one kit-root `provenance.json` (schema `1`) retains last integrated upstream repository/release/full source commit/template versions, local adaptations, and append-only upgrade history with from/to identities, per-path decisions, conflicts and verification. Source copies leave unestablished release/commit values unknown; a tag build stamps only its archive-staging copy after checking actual template markers. A blocked upgrade keeps the previous top-level identity; completion retains unknown prior origin and deliberate local differences in history/adaptations. `upgrading.md` defines ownership, separate review copies, unknown-baseline comparison, manual rulebook merging and I.1-I.4 migration boundaries. Rulebook template `1.6.0` removes blanket regeneration guidance. All store current/candidate/submission files are preserved during a toolkit upgrade; needed record/asset migrations are separately scoped application work.
+
 Acceptance:
 
 - The user can identify upstream origin, local differences, and unresolved conflicts.
@@ -187,7 +189,7 @@ For each stage, review the spec/template diff, applicable checks, remaining unce
 | Snapshot timing and resubmission references | Implemented in I.2: approved full candidate commit precedes its record reference; retain every attempt, reverify before promotion, expose unavailable history | Independent behavior verification pending |
 | Checker runtime and format | Delivered: one optional Node.js 22+ standard-library module, explicit root/store, text/JSON findings, exit 0/1/2, no writes or network retrieval | I.3 runtime decision settled; standalone tests passed on Node.js 24 / Git for Windows |
 | Asset inventory location and shared assets | Implemented in I.4: Microsoft-specific per-locale/shared JSON inventories with owned Logo source/export directories, named language consumers, complete shared snapshots, and path-only rebasing; screenshot conventions retained | Deterministic/standalone checks passed; independent behavior verification pending |
-| Provenance storage | One compact origin/adaptation record; unknown is allowed | I.5 implementation |
+| Provenance storage | Implemented in I.5: kit-root provenance JSON, manual compare/merge guide, retained unknown origin/adaptations/history, staging-only release identity stamping | Artifact/stamping and standalone checks passed; independent behavior verification pending |
 | Test strategy and release gate | Focused deterministic and agent evidence; explicit handling of inconclusive runs | First behavioral change; release review |
 
 ## 7. Completion and follow-up

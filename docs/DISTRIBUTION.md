@@ -30,13 +30,16 @@ The package must contain a fully self-contained working copy. Inside the zip, th
 store-assets/
 ├── README.md                       # static package overview
 ├── checking.md                     # optional checker usage and result meanings
+├── upgrading.md                    # manual comparison and preservation rules
+├── provenance.json                 # source defaults; stamped in release staging copy
 ├── store-assets-workflow.md       # process spec
 ├── templates/                     # document template sources
 │   └── store-rulebook.md.template
 ├── examples/
 │   ├── update-tasks.md            # fictional task examples
 │   ├── submission-history.md      # snapshot and time examples
-│   └── logo-assets.md             # listing Logo sources and upload consumers
+│   ├── logo-assets.md             # listing Logo sources and upload consumers
+│   └── manual-upgrade.md          # unknown origin and local adaptation example
 ├── scripts/
 │   └── check-store-assets.mjs      # standalone Node.js standard-library checker
 ├── microsoft-store/
@@ -52,12 +55,13 @@ store-assets/
 
 Rules for what is included and what is not:
 
-- Include everything under `starter-kit/` as-is.
+- Include everything under `starter-kit/`, with only the archive's copied `provenance.json` source identity stamped as described below. All other shipped files retain their source bytes.
 - Rename the top-level folder from `starter-kit/` to `store-assets/` when building the zip.
 - Do not include the root repo's development documents (e.g. `reference/`, `docs/`, root `README.md`, root `AGENTS.md`).
 - The packaged kit must be readable and usable on its own, without any context from the repository.
 - Include the optional checker and its guide. No dependency install or repository-only module is needed; Node.js is supplied by the application developer. The release archive check requires these files but does not run an application's validation or upload anything to a store.
 - Include Microsoft asset rules, the JSON inventory template, and the fictional Logo example. They remain readable in an isolated download; source URLs and review dates ship with the rules. Actual product inventories and artwork are generated in the application project and are not included in this kit.
+- Include the manual-upgrade guide, provenance defaults, and customized-kit example. Installed-project adaptations/history belong to the application repository and must never be bundled into a new upstream release.
 
 ## Versioning and release artifacts
 
@@ -69,6 +73,8 @@ Rules for what is included and what is not:
   ```
 
 - Published release assets are not mutated. A new version of the kit is a new release.
+- `starter-kit/provenance.json` records known upstream template markers and unknown release/commit defaults for a source copy. The tag build validates those markers against the staged templates, then stamps only `dist/store-assets/provenance.json` with `GITHUB_REPOSITORY`, the validated release tag and the full resolved checkout commit. The checkout's own files remain unchanged. The commit identifies the build's source; it does not imply the stamped bytes already existed in that commit or that the draft was published. A source checkout may have no release identity.
+- Kit release, rulebook template, inventory template, generated/local marker, product version and package version remain distinct. A manual upgrade merges installed provenance/history, rather than overwriting it with the incoming release's fresh record. Unknown original sources remain unknown. User instructions and ownership/migration boundaries ship in `starter-kit/upgrading.md`.
 - Release-note source files are versioned at `docs/releases/<tag>.md`. Before publishing a draft release, use the matching source file to replace the workflow's placeholder notes. Published release-note metadata may be corrected for factual clarity when its source file is updated in the repository.
 
 ## Required workflow behavior

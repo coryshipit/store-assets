@@ -26,6 +26,29 @@ jobs:
         run: |
           mkdir -p dist
           cp -r starter-kit dist/store-assets
+          KIT_SOURCE_COMMIT="$(git rev-parse --verify 'HEAD^{commit}')" node --input-type=module <<'NODE'
+          import fs from 'node:fs';
+          const root = 'dist/store-assets/';
+          const provenance = JSON.parse(fs.readFileSync(root + 'provenance.json', 'utf8'));
+          const release = process.env.GITHUB_REF_NAME;
+          const commit = process.env.KIT_SOURCE_COMMIT;
+          const repository = process.env.GITHUB_REPOSITORY;
+          if (!/^v[0-9]+\.[0-9]+\.[0-9]+$/.test(release || '') || !/^(?:[0-9a-f]{40}|[0-9a-f]{64})$/.test(commit || '') ||
+              !/^[A-Za-z0-9_.-]+\/[A-Za-z0-9_.-]+$/.test(repository || '') ||
+              repository.split('/').some(part => part === '.' || part === '..')) throw new Error('Invalid release source identity');
+          if (provenance.schema_version !== 1 || provenance.local_adaptations?.length !== 0 || provenance.upgrade_history?.length !== 0) throw new Error('Release provenance must start without installed-project history');
+          const versions = {
+            'templates/store-rulebook.md.template': fs.readFileSync(root + 'templates/store-rulebook.md.template', 'utf8').match(/^template_version:\s*([^\r\n]+)$/m)?.[1],
+            'microsoft-store/templates/asset-inventory.json.template': JSON.parse(fs.readFileSync(root + 'microsoft-store/templates/asset-inventory.json.template', 'utf8')).template_version,
+          };
+          if (Object.keys(provenance.upstream.template_versions).length !== Object.keys(versions).length ||
+              Object.entries(versions).some(([name, version]) => !version || provenance.upstream.template_versions[name] !== version)) throw new Error('Source provenance template versions disagree with shipped templates');
+          provenance.upstream = {
+            repository: 'https://github.com/' + repository, release, commit, template_versions: versions,
+            evidence: 'Tagged release build from this repository and full source commit; provenance was stamped in the archive staging copy, not the source tree.',
+          };
+          fs.writeFileSync(root + 'provenance.json', JSON.stringify(provenance, null, 2) + '\n');
+          NODE
           (cd dist && zip -r "../store-assets-starter-kit-${GITHUB_REF_NAME}.zip" store-assets)
 
       - name: Verify zip layout
@@ -38,7 +61,7 @@ jobs:
             exit 1
           fi
 
-          for required in README.md checking.md store-assets-workflow.md templates/store-rulebook.md.template scripts/check-store-assets.mjs examples/update-tasks.md examples/submission-history.md examples/logo-assets.md microsoft-store/asset-rules.md microsoft-store/templates/asset-inventory.json.template; do
+          for required in README.md checking.md upgrading.md provenance.json store-assets-workflow.md templates/store-rulebook.md.template scripts/check-store-assets.mjs examples/update-tasks.md examples/submission-history.md examples/logo-assets.md examples/manual-upgrade.md microsoft-store/asset-rules.md microsoft-store/templates/asset-inventory.json.template; do
             if ! printf '%s\n' "$entries" | grep -qx "store-assets/$required"; then
               echo "ERROR: required package file missing: $required"
               exit 1

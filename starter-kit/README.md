@@ -21,12 +21,16 @@ For a read-only structural check, run `node store-assets/scripts/check-store-ass
 
 For Logo changes, use the Microsoft-specific [asset roles and inventory guide](microsoft-store/asset-rules.md) and [Logo example](examples/logo-assets.md). Each export names its source, listing language consumers, and upload field. MSIX listing Logos and MSI/EXE box/poster art have distinct rules; package icons are separate application assets. Inventories support localized ownership or deliberate sharing without changing screenshot directories.
 
+To update an installed kit, follow [the manual upgrade guide](upgrading.md). Keep its [provenance record](provenance.json), compare incoming files in a separate folder, and merge local rules deliberately. The record keeps upstream release/commit/template evidence, local adaptations and upgrade history; an unknown original source stays unknown. Toolkit upgrades preserve current assets, active candidates and submission history. See [the customized-kit example](examples/manual-upgrade.md).
+
 ## How the kit is organized
 
 ```text
 store-assets/
 ├── README.md                       # this file — static package overview
 ├── checking.md                     # optional checker usage and result meanings
+├── upgrading.md                    # manual comparison, ownership and conflict handling
+├── provenance.json                 # upstream source, adaptations and upgrade history
 ├── store-assets-workflow.md       # process spec — how every task runs
 ├── <PRODUCT_NAME>-store-assets.md  # generated rulebook — this project's rules
 ├── templates/
@@ -34,7 +38,8 @@ store-assets/
 ├── examples/
 │   ├── update-tasks.md            # fictional task examples, not application data
 │   ├── submission-history.md      # durable snapshots and event/date meanings
-│   └── logo-assets.md             # source/export and upload-consumer example
+│   ├── logo-assets.md             # source/export and upload-consumer example
+│   └── manual-upgrade.md          # customized/unknown-origin upgrade example
 ├── scripts/
 │   └── check-store-assets.mjs      # read-only structural checks, Node.js standard library
 ├── microsoft-store/
@@ -53,8 +58,8 @@ The kit ships this static `README.md`, the workflow, checking guide/script, temp
 
 Two documents do different jobs, and their split is deliberate:
 
-- `store-assets-workflow.md` is the **process spec**. It is the same in every project and is the point of entry for every task. It defines the supported store adapters and the variable contract — which placeholders mean, where their values come from, and how templates should be shipped. The contract lives there because generation is part of the process; rules knowledge stays separate.
-- `<PRODUCT_NAME>-store-assets.md` is the **project rulebook**. It is generated once from `templates/store-rulebook.md.template` with your project's values, and holds this project's structure, naming, and validation rules. Rules change per project; process never does.
+- `store-assets-workflow.md` is the **process spec**. It ships as the shared upstream process and is the point of entry for every task. It defines the supported store adapters and the variable contract — which placeholders mean, where their values come from, and how templates should be shipped. Record project-specific workflow edits as local adaptations in provenance so an upgrade can preserve and review them.
+- `<PRODUCT_NAME>-store-assets.md` is the **project rulebook**. It is generated once from `templates/store-rulebook.md.template` with your project's values, and holds this project's structure, naming, and validation rules. Later changes are merged into it deliberately, preserving local rules and generation evidence.
 
 In one line: workflow is the protocol, rulebook is this project's resolved rules.
 

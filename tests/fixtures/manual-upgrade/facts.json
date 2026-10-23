@@ -1,0 +1,15 @@
+{
+  "baseline_commit": "22f9a6515825a6c04f352c14471e202731c6158c",
+  "baseline_rulebook_template": "1.5.0",
+  "product": "Northstar Notes",
+  "locale": "en-US",
+  "application_version": "1.0.0",
+  "local_marker": "7.2.0-local",
+  "local_extension": "## Local first-submission extension\n\nProject-specific first-submission instructions are retained as local customization, outside upstream support. Do not execute them in this upgrade exercise.\n",
+  "workflow_adaptation": "LOCAL_REVIEW_RULE: preserve the maintainer's review before any upload.",
+  "draft_id": "2026-10-23-logo-refresh",
+  "history_id": "2026-10-20-published",
+  "recorded_at": "2026-10-23T16:00:00+08:00",
+  "source_identity_note": "The harness knows the old source to reproduce inputs. This does not supply the fictional installed project's missing origin evidence: keep that origin and its upstream template version Unknown.",
+  "conflict_decision": "Fictional maintainer explicitly retains the local first-submission extension as local customization; upstream updates-only scope remains in force for its supported workflow. Preserve the local marker and document the difference."
+}
