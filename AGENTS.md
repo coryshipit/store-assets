@@ -88,6 +88,7 @@ iteration/<case-name>-feedback
 - Use the application or usage case name in lowercase kebab-case, for example `iteration/dirpilot-feedback`.
 - For another iteration on the same case, append the date: `iteration/dirpilot-feedback-2026-10-22` (`YYYY-MM-DD`).
 - Group the selected improvements and their verification on this branch for review before merging into `main`. The branch identifies the feedback source; it does not imply acceptance of every suggestion in that feedback.
+- After the merge is pushed, verify that `origin/main` contains the iteration branch tip, then delete the merged local and remote iteration branches. Their commits remain in `main` history. Keep a branch only while it has unmerged work or an active review reason; start a later iteration on a new date-suffixed branch.
 
 ## 5. Stable product boundary
 
