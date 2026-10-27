@@ -200,6 +200,7 @@ Independent review evidence (2026-10-23, after I.6): source `b5cfaa2913003ce0728
 | --- | --- | --- | --- |
 | v0.1.0 | 2026-08-09 | `store-assets-starter-kit-v0.1.0.zip` | First release of the kit. Built by the tag-triggered packaging workflow; zip top-level folder is `store-assets/`. |
 | v0.1.1 | 2026-08-10 | `store-assets-starter-kit-v0.1.1.zip` | Published release. The package was manually downloaded and extracted; its contents were verified to match the required layout. |
+| v0.2.0 | 2026-10-27 | `store-assets-starter-kit-v0.2.0.zip` | Published from tag source `4a35d58`; actual downloaded asset SHA-256 and stamped provenance verified. See [`v0.2.0 release notes`](releases/v0.2.0.md). |
 
 ### QA exception: v0.1.1 release (2026-08-10)
 
@@ -242,7 +243,7 @@ Static checks completed for the release: documentation and workflow consistency 
 
 ## Priority
 
-Current state (2026-10-27): Task I is merged. Prepare a future versioned package from a reviewed release commit, select a release tag and matching release notes, run conformance and applicable scenario checks, then inspect the actual downloaded draft asset before publication. No new version number or release tag has been selected. Broader Task G work remains open; first-submission support remains outside the accepted scope; Tasks D and H remain separate follow-up work.
+Current state (2026-10-27): Task I is merged and release `v0.2.0` is published. Its tagged source, release notes, conformance/scenario evidence, downloaded asset and stamped provenance are recorded above and in the versioned release notes. Broader Task G work remains open; first-submission support remains outside the accepted scope; Tasks D and H remain separate follow-up work.
 
 1. Keep lifecycle, naming, and terminology consistent across `README.md`, `starter-kit/`, templates, and examples.
 2. Research and decide the release-testing approach (Task G).
@@ -251,8 +252,8 @@ Current state (2026-10-27): Task I is merged. Prepare a future versioned package
 
 ## Next steps
 
-- For a future package, verify the selected source commit, matching release notes, archive contents and actual downloaded draft asset before publication.
-- Research the testing approach (Task G): decide whether dry-run stays, is replaced, or is supplemented before using it as a release gate. The planned v0.1.1 release is an explicit exception, recorded above.
+- Continue Task G: evaluate repeated execution, cost/reliability and release-gate evidence before treating one independent scenario set as a broad reliability result.
+- For each later release, retain the source/tag/notes linkage and verify the actual downloaded draft asset before publication.
 - Clarify and accept the concrete list for Task D with verifiable sources before writing it into `README.md`.
 - Track new tasks here; broader/general-purpose initialization, validation, CLI and multi-store adapters remain future work. The focused read-only Microsoft Store checker is already shipped in Phase 1.
 - Resolve Task H (which folder users should use after unzipping the release) and, if needed, adjust the packaging contract and release notes.
