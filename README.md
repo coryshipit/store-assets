@@ -8,9 +8,9 @@ It is **not** a store backend replacement, SaaS, GUI, ASO platform, or auto-uplo
 
 ## ⚡ Getting started
 
-To use Store Assets in your own app project:
+The root README describes the current repository source. Downloadable release zips are versioned snapshots and may not yet contain changes on the current branch. To use a published package in your own app project:
 
-1. 📥 Download the latest release zip from GitHub Releases and unzip it — you get a `store-assets/` folder, ready to use.
+1. 📥 Choose a published version from [GitHub Releases](https://github.com/coryshipit/store-assets/releases), download its zip, and unzip it — you get a `store-assets/` folder, ready to use.
 2. 📂 Drop `store-assets/` into your app repository (it ships with the right name, so no renaming needed). Each app project uses one independent `store-assets/` work package.
 3. 🤖 Ask an agent to read `store-assets-workflow.md` first.
 4. ✅ Run initialization, prepare a submission, or run a validation task.

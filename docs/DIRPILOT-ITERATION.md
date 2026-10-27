@@ -2,9 +2,9 @@
 
 Date: 2026-10-22
 
-Branch: `iteration/dirpilot-feedback`
+Development branch (merged into `main` on 2026-10-27): `iteration/dirpilot-feedback`
 
-Status: plan accepted on 2026-10-22; I.1-I.6 implemented; ten selected independent scenarios passed on 2026-10-23; ready for merge review
+Status: plan accepted on 2026-10-22; I.1-I.6 implemented and merged into `main` on 2026-10-27; ten selected independent scenarios passed on 2026-10-23; versioned package/release verification remains pending
 
 ## 1. Purpose and evidence
 
@@ -223,6 +223,6 @@ I.6 settled the focused policy/scenario alignment in `docs/QA.md` and now has th
 
 Each stage is complete only when its user-facing rules ship inside the standalone kit, applicable examples/checks demonstrate the behavior, and roadmap status matches the evidence. Do not mark an unrun scenario as passed.
 
-The iteration is ready for merge review when all selected stages have their acceptance evidence, compatibility guidance, and a coherent package layout. Tagging, publishing, pushing, and merging are separate actions and are not part of this planning task. Existing roadmap Tasks D and H remain separate unless later selected explicitly. Task G is updated only for work actually completed.
+The iteration was ready for merge review when all selected stages had their acceptance evidence, compatibility guidance, and a coherent package layout. It has since been merged into `main`. Tagging, publishing and actual release-asset verification remain separate actions. Existing roadmap Tasks D and H remain separate unless later selected explicitly. Task G is updated only for work actually completed.
 
-Current review boundary: I.1-I.6 implementation, applicable deterministic/artifact checks and ten selected independent scenarios provide evidence for merge review. The branch has not been merged. Additional executor/variant coverage and actual release workflow/download evidence remain separate work; no release readiness or exception is inferred.
+Current review boundary: I.1-I.6 implementation, applicable deterministic/artifact checks and ten selected independent scenarios are merged into `main`. Additional executor/variant coverage, a future tagged package, actual release workflow execution and downloaded-asset inspection remain separate work; this iteration does not claim release readiness or a release exception.

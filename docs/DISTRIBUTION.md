@@ -91,7 +91,7 @@ For each release tag, the mechanism should:
 4. Attach the zip to the release as an asset.
 5. Be repeatable while its GitHub Release remains a draft; published release assets are never modified.
 
-The workflow only runs when a `vX.Y.Z` tag is pushed. It packages `starter-kit/` as `store-assets/` in a zip named `store-assets-starter-kit-<tag>.zip`, verifies that every archive path is under `store-assets/`, checks the static README, workflow, and rulebook template, rejects development files, and attaches the zip to a draft release. It creates the draft if needed. Re-runs may replace an asset only while that release is still a draft; a published release causes the workflow to fail rather than mutate it.
+The workflow only runs when a `vX.Y.Z` tag is pushed. It packages `starter-kit/` as `store-assets/` in a zip named `store-assets-starter-kit-<tag>.zip`, verifies that every archive path is under `store-assets/`, checks all required entry points, templates, checker files, examples and Microsoft Store adapter files listed in `.github/workflows/release.yml`, rejects development files, and attaches the zip to a draft release. It creates the draft if needed. Re-runs may replace an asset only while that release is still a draft; a published release causes the workflow to fail rather than mutate it.
 
 ## Acceptance criteria
 

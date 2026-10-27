@@ -189,7 +189,7 @@ Each run produces a short result report, written to the relevant task or commit 
 - **Change under test** — what was edited and why.
 - **Fixture** — the app version and locale the fixture used.
 - **Outcome** — conformance, artifact exercise, and fresh-agent results separately (`PASS` / `FAIL` / `INCONCLUSIVE`, or `not run`); include gaps such as missing instructions, unresolved placeholders, or spec mismatches.
-- **Cleanliness** — the residual check result: run directory created and removed, and confirmation that nothing remains outside the repository. Call it out explicitly if a leftover was found and removed.
+- **Cleanup** — the controlled run directory's before/after inventory and removal result, plus any observed residue within the inspected scope. Do not infer that nothing remains elsewhere on the system from a project-only inventory; describe executor-owned logs/caches only when they were actually inspected.
 
 These are recorded as text in the change's commit or task; per-run logs do not belong in the repository.
 
